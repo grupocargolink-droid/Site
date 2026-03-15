@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CargoLink — Plataforma de Entregas</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+:root{
+  --p:#22C55E;--pd:#16A34A;--pl:#DCFCE7;--pm:#BBF7D0;
+  --bg:#fff;--bg2:#F5F5F5;--bg3:#F0FDF4;
+  --tx:#111;--tx2:#6B7280;--tx3:#9CA3AF;
+  --bd:#E5E7EB;
+  --sh:0 4px 16px rgba(0,0,0,.08);
+  --shl:0 8px 32px rgba(0,0,0,.1);
+  --shxl:0 20px 60px rgba(0,0,0,.12);
+  --r:16px;--rl:20px;--rxl:24px;
+}
+body{font-family:"Plus Jakarta Sans",sans-serif;color:var(--tx);background:var(--bg);overflow-x:hidden;}
+h1,h2,h3{font-weight:800;line-height:1.1;letter-spacing:-.02em;}
+p{line-height:1.7;color:var(--tx2);}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,.93);backdrop-filter:blur(20px);border-bottom:1px solid var(--bd);height:68px;display:flex;align-items:center;padding:0 5%;}
+.ni{width:100%;max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;}
+.nlogo{font-size:1.3rem;font-weight:800;color:var(--tx);letter-spacing:-.03em;cursor:pointer;}
+.nlogo span{color:var(--p);}
+.nlinks{display:flex;align-items:center;gap:1.8rem;}
+.nlinks a{font-size:.88rem;font-weight:500;color:var(--tx2);text-decoration:none;transition:color .2s;}
+.nlinks a:hover{color:var(--tx);}
+.ncta{display:flex;gap:.6rem;}
+.bgh{padding:.55rem 1.1rem;border:1.5px solid var(--bd);border-radius:10px;font-size:.85rem;font-weight:600;color:var(--tx);cursor:pointer;background:#fff;transition:all .2s;font-family:"Plus Jakarta Sans",sans-serif;}
+.bgh:hover{border-color:var(--p);color:var(--p);}
+.bpr{padding:.55rem 1.3rem;border:none;border-radius:10px;font-size:.85rem;font-weight:700;color:#fff;cursor:pointer;background:var(--p);transition:all .2s;font-family:"Plus Jakarta Sans",sans-serif;}
+.bpr:hover{background:var(--pd);transform:translateY(-1px);box-shadow:0 4px 16px rgba(34,197,94,.3);}
+.hbg{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:.4rem;}
+.hbg span{display:block;width:22px;height:2px;background:var(--tx);border-radius:2px;}
+/* HERO */
+.hero{min-height:100vh;padding:68px 5% 0;display:flex;align-items:center;background:var(--bg);position:relative;overflow:hidden;}
+.hero::before{content:"";position:absolute;top:-200px;right:-200px;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(34,197,94,.07) 0%,transparent 70%);pointer-events:none;}
+.hi{max-width:1200px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;padding:4rem 0;}
+.htag{display:inline-flex;align-items:center;gap:.45rem;background:var(--pl);color:var(--pd);font-size:.75rem;font-weight:700;padding:.35rem .9rem;border-radius:100px;margin-bottom:1.4rem;letter-spacing:.04em;text-transform:uppercase;}
+.htag-dot{width:6px;height:6px;background:var(--p);border-radius:50%;animation:bl 2s infinite;}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.25}}
+h1.ht{font-size:clamp(2.6rem,4.5vw,4rem);color:var(--tx);margin-bottom:1.4rem;}
+h1.ht .acc{color:var(--p);}
+.hdesc{font-size:1rem;color:var(--tx2);max-width:460px;margin-bottom:2.5rem;line-height:1.75;}
+.hbtns{display:flex;gap:.9rem;flex-wrap:wrap;margin-bottom:2.8rem;}
+.blg{padding:.85rem 1.8rem;border-radius:var(--r);font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:"Plus Jakarta Sans",sans-serif;display:inline-flex;align-items:center;gap:.45rem;}
+.blgp{background:var(--p);color:#fff;border:none;box-shadow:0 4px 20px rgba(34,197,94,.28);}
+.blgp:hover{background:var(--pd);transform:translateY(-2px);box-shadow:0 8px 28px rgba(34,197,94,.38);}
+.blgo{background:#fff;color:var(--tx);border:1.5px solid var(--bd);}
+.blgo:hover{border-color:var(--p);color:var(--p);}
+.hstats{display:flex;gap:2.5rem;flex-wrap:wrap;}
+.stat .sn{font-size:1.75rem;font-weight:800;color:var(--tx);letter-spacing:-.03em;}
+.stat .sn .u{color:var(--p);}
+.stat .sl{font-size:.75rem;color:var(--tx2);margin-top:.08rem;font-weight:500;}
+/* PHONE */
+.hv{position:relative;padding:1rem;}
+.fc{position:absolute;background:#fff;border-radius:var(--r);box-shadow:var(--shl);padding:.75rem .95rem;min-width:155px;z-index:10;}
+.fc1{top:-18px;right:-28px;animation:f1 4s ease-in-out infinite;}
+.fc2{bottom:18px;left:-38px;animation:f2 5s ease-in-out infinite;}
+@keyframes f1{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes f2{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+.fcl{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);margin-bottom:.25rem;}
+.fcv{font-size:1.05rem;font-weight:800;color:var(--tx);}
+.fcv.g{color:var(--p);}
+.fcs{font-size:.62rem;color:var(--tx2);margin-top:.08rem;}
+.fcb{height:4px;background:var(--bd);border-radius:2px;margin-top:.4rem;overflow:hidden;}
+.fcbf{height:100%;background:var(--p);border-radius:2px;width:72%;}
+.pmock{background:#fff;border-radius:var(--rxl);box-shadow:var(--shxl);overflow:hidden;border:1px solid var(--bd);}
+.ptop{background:var(--p);padding:.95rem 1.1rem;display:flex;align-items:center;justify-content:space-between;}
+.plogoP{font-size:.9rem;font-weight:800;color:#fff;letter-spacing:-.02em;}
+.pst{display:flex;align-items:center;gap:.35rem;background:rgba(255,255,255,.2);border-radius:20px;padding:.18rem .65rem;font-size:.68rem;font-weight:700;color:#fff;}
+.pst-dot{width:5px;height:5px;background:#fff;border-radius:50%;animation:bl 2s infinite;}
+/* truck scene */
+.tscene{background:linear-gradient(135deg,#f0fdf4,#dcfce7);padding:1.2rem;position:relative;overflow:hidden;height:170px;}
+.road{position:absolute;bottom:0;left:0;right:0;height:36px;background:#d1d5db;}
+.roadln{position:absolute;bottom:16px;left:0;right:0;height:3px;background:repeating-linear-gradient(90deg,#fff 0,#fff 28px,transparent 28px,transparent 56px);animation:rm 1s linear infinite;}
+@keyframes rm{from{background-position:0}to{background-position:56px}}
+.truckwrap{position:absolute;bottom:36px;left:50%;transform:translateX(-50%);animation:tb 2s ease-in-out infinite;}
+@keyframes tb{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-3px)}}
+.cl{position:absolute;border-radius:50px;background:rgba(255,255,255,.8);}
+/* phone dash */
+.pdash{padding:.9rem 1.1rem;}
+.mstats{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.7rem;}
+.mc{background:var(--bg2);border-radius:11px;padding:.65rem .75rem;}
+.mcv{font-size:1.15rem;font-weight:800;color:var(--tx);}
+.mcv.g{color:var(--p);}
+.mcl{font-size:.6rem;font-weight:600;color:var(--tx2);margin-top:.08rem;text-transform:uppercase;letter-spacing:.04em;}
+.di{display:flex;align-items:center;gap:.65rem;padding:.6rem .75rem;background:var(--bg2);border-radius:11px;margin-bottom:.45rem;}
+.diic{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;}
+.diic.a{background:var(--pl);}
+.diic.p{background:#FEF3C7;}
+.diinf{flex:1;}
+.dirt{font-size:.78rem;font-weight:700;color:var(--tx);}
+.dimt{font-size:.63rem;color:var(--tx2);margin-top:.08rem;}
+.dipr{font-size:.85rem;font-weight:800;color:var(--p);}
+.stbtn{width:100%;margin-top:.55rem;padding:.65rem;background:var(--p);border:none;border-radius:11px;color:#fff;font-family:"Plus Jakarta Sans",sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.35rem;}
+/* SECTIONS */
+.sec{padding:5.5rem 5%;}
+.si{max-width:1200px;margin:0 auto;}
+.stag{display:inline-block;background:var(--pl);color:var(--pd);font-size:.7rem;font-weight:700;padding:.3rem .85rem;border-radius:100px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.9rem;}
+.stitle{font-size:clamp(1.7rem,3.5vw,2.6rem);color:var(--tx);margin-bottom:.9rem;}
+.ssub{font-size:.95rem;color:var(--tx2);max-width:540px;line-height:1.7;}
+/* FEATURES */
+.fg{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;margin-top:2.8rem;}
+.fc2{background:#fff;border:1px solid var(--bd);border-radius:var(--rl);padding:1.7rem;transition:all .3s;cursor:default;position:static;min-width:auto;box-shadow:none;}
+.fc2:hover{border-color:var(--p);box-shadow:var(--shl);transform:translateY(-4px);}
+.fic{width:48px;height:48px;border-radius:13px;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:1.1rem;}
+.ftit{font-size:1rem;font-weight:700;color:var(--tx);margin-bottom:.4rem;}
+.fdesc{font-size:.85rem;color:var(--tx2);line-height:1.65;}
+/* DASHBOARD */
+.dsec{background:var(--bg2);padding:5.5rem 5%;}
+.dprev{background:#fff;border-radius:var(--rxl);box-shadow:var(--shxl);overflow:hidden;border:1px solid var(--bd);max-width:880px;margin:2.8rem auto 0;}
+.dhd{background:var(--p);padding:1.1rem 1.6rem;display:flex;align-items:center;justify-content:space-between;}
+.dhlogo{font-size:1.05rem;font-weight:800;color:#fff;}
+.dhr{display:flex;align-items:center;gap:.7rem;}
+.dstog{display:flex;align-items:center;gap:.45rem;background:rgba(255,255,255,.2);border-radius:20px;padding:.25rem .75rem;}
+.dsdot{width:7px;height:7px;background:#4ade80;border-radius:50%;box-shadow:0 0 5px #4ade80;}
+.dstxt{font-size:.72rem;font-weight:700;color:#fff;}
+.dusr{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.28);display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;color:#fff;}
+.dbody{display:grid;grid-template-columns:220px 1fr;min-height:400px;}
+.dsb{border-right:1px solid var(--bd);padding:1.1rem;}
+.dsbt{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--tx2);margin-bottom:.75rem;}
+.dni{display:flex;align-items:center;gap:.6rem;padding:.6rem .75rem;border-radius:9px;cursor:pointer;margin-bottom:.2rem;font-size:.82rem;font-weight:600;color:var(--tx2);transition:all .2s;}
+.dni.on{background:var(--pl);color:var(--pd);}
+.dni:hover:not(.on){background:var(--bg2);}
+.dsep{height:1px;background:var(--bd);margin:.9rem 0;}
+.zl{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--tx2);margin-bottom:.55rem;}
+.zi{display:flex;align-items:center;gap:.45rem;padding:.38rem .55rem;border-radius:7px;cursor:pointer;font-size:.78rem;font-weight:600;color:var(--tx);margin-bottom:.18rem;border:1px solid transparent;transition:all .2s;}
+.zi:hover,.zi.on{border-color:var(--p);color:var(--pd);background:var(--pl);}
+.zck{margin-left:auto;color:var(--p);font-size:.7rem;display:none;}
+.zi.on .zck{display:block;}
+.dm{padding:1.1rem 1.4rem;overflow-y:auto;}
+.dsr{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;margin-bottom:1.1rem;}
+.dsc{background:var(--bg2);border-radius:11px;padding:.85rem .95rem;}
+.dscv{font-size:1.25rem;font-weight:800;color:var(--tx);letter-spacing:-.02em;}
+.dscv.g{color:var(--p);}
+.dscl{font-size:.6rem;font-weight:600;color:var(--tx2);margin-top:.12rem;text-transform:uppercase;letter-spacing:.04em;}
+.dsct{font-size:.62rem;color:var(--p);margin-top:.18rem;font-weight:600;}
+.dot{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);margin-bottom:.65rem;}
+.doc{background:#fff;border:1.5px solid var(--bd);border-radius:11px;padding:.85rem;margin-bottom:.55rem;display:flex;align-items:center;gap:.75rem;cursor:pointer;transition:all .2s;}
+.doc:hover{border-color:var(--p);box-shadow:0 4px 12px rgba(34,197,94,.1);}
+.doc.nw{border-color:var(--p);background:var(--bg3);}
+.docic{width:36px;height:36px;border-radius:9px;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;}
+.docic.or{background:#FEF3C7;}
+.docinf{flex:1;}
+.docrt{font-size:.83rem;font-weight:700;color:var(--tx);}
+.docmt{font-size:.68rem;color:var(--tx2);margin-top:.12rem;}
+.docr{text-align:right;}
+.docpr{font-size:.92rem;font-weight:800;color:var(--p);}
+.docbg{font-size:.58rem;font-weight:700;padding:.12rem .42rem;border-radius:5px;margin-top:.18rem;display:inline-block;}
+.bn{background:var(--pl);color:var(--pd);}
+.bg2{background:#FEF3C7;color:#92400E;}
+.accbtn{width:100%;margin-top:.75rem;padding:.72rem;background:var(--p);border:none;border-radius:11px;color:#fff;font-family:"Plus Jakarta Sans",sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:.4rem;}
+.accbtn:hover{background:var(--pd);}
+/* HOW */
+.hwg{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;margin-top:2.8rem;}
+.hws{display:flex;flex-direction:column;gap:0;}
+.hws-step{display:flex;gap:1.1rem;padding:1.1rem 0;border-bottom:1px solid var(--bd);}
+.hws-step:last-child{border-bottom:none;}
+.snum{width:38px;height:38px;border-radius:11px;background:var(--pl);color:var(--pd);font-size:.95rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.snum.on{background:var(--p);color:#fff;}
+.stxt h4{font-size:.92rem;font-weight:700;color:var(--tx);margin-bottom:.28rem;}
+.stxt p{font-size:.83rem;color:var(--tx2);line-height:1.6;}
+/* MAP */
+.mapv{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:var(--rxl);padding:1.4rem;position:relative;overflow:hidden;height:360px;}
+.mgr{position:absolute;inset:0;background-image:linear-gradient(rgba(34,197,94,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(34,197,94,.055) 1px,transparent 1px);background-size:26px 26px;}
+.mrh{position:absolute;background:rgba(255,255,255,.8);}
+.mrv{position:absolute;background:rgba(255,255,255,.8);}
+.mbl{position:absolute;background:rgba(34,197,94,.09);border-radius:4px;}
+.rsvg{position:absolute;inset:0;width:100%;height:100%;}
+.mpg{position:absolute;z-index:5;}
+.mpgb{width:15px;height:19px;background:var(--p);border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 3px 8px rgba(34,197,94,.38);}
+.mpgd{width:5px;height:5px;background:#fff;border-radius:50%;position:absolute;top:4px;left:4px;}
+.trkm{position:absolute;font-size:1.3rem;filter:drop-shadow(0 2px 4px rgba(0,0,0,.18));animation:trm 6s linear infinite;}
+@keyframes trm{0%{left:10%;top:55%}25%{left:32%;top:42%}50%{left:55%;top:50%}75%{left:72%;top:37%}100%{left:10%;top:55%}}
+.ib{position:absolute;background:#fff;border-radius:9px;padding:.45rem .75rem;box-shadow:var(--sh);font-size:.7rem;}
+.ibv{font-weight:800;color:var(--tx);font-size:.88rem;}
+.ibl{color:var(--tx2);font-size:.62rem;}
+/* COUNTRIES */
+.csec{padding:5.5rem 5%;background:var(--bg);}
+.cg{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.9rem;margin-top:2.4rem;}
+.cc{background:#fff;border:1.5px solid var(--bd);border-radius:var(--r);padding:1.1rem;text-align:center;cursor:pointer;transition:all .25s;}
+.cc:hover,.cc.on{border-color:var(--p);background:var(--bg3);transform:translateY(-3px);box-shadow:0 8px 22px rgba(34,197,94,.11);}
+.cf{font-size:2rem;margin-bottom:.5rem;display:block;}
+.cn{font-size:.83rem;font-weight:700;color:var(--tx);}
+.cs{font-size:.66rem;font-weight:600;margin-top:.22rem;}
+.cs.av{color:var(--p);}
+.cs.sn{color:var(--tx2);}
+.cs.ac{color:var(--p);display:flex;align-items:center;justify-content:center;gap:.28rem;}
+.csd{width:4px;height:4px;background:var(--p);border-radius:50%;}
+/* TIERS */
+.tsec{background:var(--bg2);padding:5.5rem 5%;}
+.tg{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;margin-top:2.8rem;}
+.tc{background:#fff;border-radius:var(--rl);padding:1.8rem;border:1.5px solid var(--bd);transition:all .3s;text-align:center;}
+.tc.ft{border-color:var(--p);box-shadow:0 8px 32px rgba(34,197,94,.14);}
+.tbg{display:inline-block;font-size:.68rem;font-weight:700;padding:.28rem .75rem;border-radius:20px;margin-bottom:.9rem;text-transform:uppercase;letter-spacing:.06em;}
+.tbg.st{background:var(--bg2);color:var(--tx2);}
+.tbg.sl{background:#F0FDF4;color:var(--pd);}
+.tbg.gd{background:#FEF3C7;color:#92400E;}
+.tpct{font-size:3.2rem;font-weight:800;color:var(--tx);letter-spacing:-.04em;line-height:1;}
+.tpct .ps{font-size:1.6rem;vertical-align:super;}
+.tpct.g{color:var(--p);}
+.trat{font-size:.83rem;color:var(--tx2);margin-top:.45rem;}
+.tdesc{font-size:.8rem;color:var(--tx2);margin-top:.75rem;line-height:1.6;}
+/* CTA */
+.ctas{padding:5.5rem 5%;background:var(--p);position:relative;overflow:hidden;}
+.ctas::before{content:"";position:absolute;top:-90px;right:-90px;width:380px;height:380px;border-radius:50%;background:rgba(255,255,255,.05);pointer-events:none;}
+.ctai{max-width:660px;margin:0 auto;text-align:center;position:relative;z-index:1;}
+.ctai h2{font-size:clamp(1.9rem,3.5vw,2.8rem);color:#fff;margin-bottom:.9rem;}
+.ctai p{color:rgba(255,255,255,.8);font-size:1rem;margin-bottom:2.2rem;}
+.ctabs{display:flex;gap:.9rem;justify-content:center;flex-wrap:wrap;}
+.bwh{padding:.85rem 1.8rem;border-radius:var(--r);font-size:.95rem;font-weight:700;cursor:pointer;background:#fff;color:var(--pd);border:none;transition:all .2s;font-family:"Plus Jakarta Sans",sans-serif;}
+.bwh:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.14);}
+.bwho{padding:.85rem 1.8rem;border-radius:var(--r);font-size:.95rem;font-weight:700;cursor:pointer;background:transparent;color:#fff;border:2px solid rgba(255,255,255,.38);transition:all .2s;font-family:"Plus Jakarta Sans",sans-serif;}
+.bwho:hover{border-color:#fff;background:rgba(255,255,255,.1);}
+/* FOOTER */
+footer{background:#111;padding:3.2rem 5% 1.8rem;}
+.fi{max-width:1200px;margin:0 auto;}
+.ftop{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:2.8rem;margin-bottom:2.8rem;}
+.flogo{font-size:1.25rem;font-weight:800;color:#fff;letter-spacing:-.02em;margin-bottom:.75rem;}
+.flogo span{color:var(--p);}
+.fdesc{font-size:.83rem;color:#6B7280;line-height:1.7;}
+.fcol h4{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6B7280;margin-bottom:.9rem;}
+.fcol a{display:block;font-size:.83rem;color:#9CA3AF;margin-bottom:.45rem;text-decoration:none;transition:color .2s;}
+.fcol a:hover{color:#fff;}
+.fbot{border-top:1px solid #222;padding-top:1.4rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem;}
+.fbot p,.fmade{font-size:.76rem;color:#6B7280;}
+.fmade span{color:var(--p);}
+.mmenu{display:none;position:fixed;inset:0;background:#fff;z-index:99;padding:4.5rem 1.4rem 2rem;flex-direction:column;gap:1.4rem;}
+.mmenu.open{display:flex;}
+.mmenu a{font-size:1.1rem;font-weight:700;color:var(--tx);border-bottom:1px solid var(--bd);padding-bottom:.9rem;text-decoration:none;}
+.fu{opacity:0;transform:translateY(28px);transition:opacity .7s,transform .7s;}
+.fu.vis{opacity:1;transform:none;}
+@media(max-width:1024px){.fg{grid-template-columns:1fr 1fr;}.dbody{grid-template-columns:1fr;}.dsb{display:none;}.dsr{grid-template-columns:1fr 1fr;}.tg{grid-template-columns:1fr 1fr;}.ftop{grid-template-columns:1fr 1fr;gap:1.8rem;}}
+@media(max-width:768px){.nlinks,.ncta{display:none;}.hbg{display:flex;}.hi{grid-template-columns:1fr;gap:2rem;padding:2.8rem 0;}.hv{display:none;}.fg{grid-template-columns:1fr;}.hwg{grid-template-columns:1fr;}.mapv{display:none;}.cg{grid-template-columns:repeat(3,1fr);}.tg{grid-template-columns:1fr;}.ctabs{flex-direction:column;align-items:center;}.ftop{grid-template-columns:1fr;}}
+@media(max-width:480px){.cg{grid-template-columns:repeat(2,1fr);}.hstats{gap:1.4rem;}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="ni">
+    <div class="nlogo" onclick="window.scrollTo({top:0,behavior:'smooth'})">Cargo<span>Link</span></div>
+    <div class="nlinks">
+      <a href="#feat">Funcionalidades</a>
+      <a href="#dash">Dashboard</a>
+      <a href="#countries">Países</a>
+      <a href="#tiers">Comissões</a>
+    </div>
+    <div class="ncta">
+      <button class="bgh" onclick="location.href='entrar.html'">Entrar</button>
+      <button class="bpr" onclick="location.href='entrar.html?tipo=operador'">Começar →</button>
+    </div>
+    <button class="hbg" onclick="document.getElementById('mm').classList.toggle('open')">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="mmenu" id="mm">
+  <a href="#feat" onclick="document.getElementById('mm').classList.remove('open')">Funcionalidades</a>
+  <a href="#dash" onclick="document.getElementById('mm').classList.remove('open')">Dashboard</a>
+  <a href="#countries" onclick="document.getElementById('mm').classList.remove('open')">Países</a>
+  <a href="#tiers" onclick="document.getElementById('mm').classList.remove('open')">Comissões</a>
+  <button class="blg blgp" style="width:100%;justify-content:center;margin-top:.8rem" onclick="location.href='entrar.html'">Entrar na app →</button>
+</div>
+<section class="hero">
+  <div class="hi">
+    <div>
+      <div class="htag"><span class="htag-dot"></span>Plataforma de Entregas · Portugal</div>
+      <h1 class="ht">Entregas rápidas,<br><span class="acc">sem complicações.</span></h1>
+      <p class="hdesc">Liga clientes a operadores verificados em todo o país. Rastreamento em tempo real, pagamento automático e comissões que crescem com a tua avaliação.</p>
+      <div class="hbtns">
+        <button class="blg blgp" onclick="location.href='entrar.html'">📦 Enviar carga</button>
+        <button class="blg blgo" onclick="location.href='entrar.html?tipo=operador'">🚛 Ser operador</button>
+      </div>
+      <div class="hstats">
+        <div class="stat"><div class="sn">2.4<span class="u">K+</span></div><div class="sl">Entregas concluídas</div></div>
+        <div class="stat"><div class="sn">380<span class="u">+</span></div><div class="sl">Operadores ativos</div></div>
+        <div class="stat"><div class="sn">4.9<span class="u">★</span></div><div class="sl">Avaliação média</div></div>
+      </div>
+    </div>
+    <div class="hv">
+      <div class="fc fc1"><div class="fcl">Ganhos hoje</div><div class="fcv g">€ 187,40</div><div class="fcs">4 entregas · 312 km</div><div class="fcb"><div class="fcbf"></div></div></div>
+      <div class="fc fc2"><div class="fcl">Pedido novo</div><div class="fcv">Lisboa → Porto</div><div class="fcs" style="color:var(--p);font-weight:700">€ 34,80 · Aceitar →</div></div>
+      <div class="pmock">
+        <div class="ptop"><div class="plogoP">CargoLink</div><div class="pst"><div class="pst-dot"></div>Disponível</div></div>
+        <div class="tscene">
+          <div class="cl" style="width:55px;height:18px;top:18px;left:18px;animation:f1 8s linear infinite"></div>
+          <div class="cl" style="width:38px;height:13px;top:32px;right:28px;animation:f2 12s linear infinite"></div>
+          <div class="truckwrap">
+            <svg width="155" height="76" viewBox="0 0 155 76" fill="none">
+              <rect x="0" y="18" width="96" height="42" rx="6" fill="#16A34A"/>
+              <rect x="2" y="20" width="92" height="38" rx="5" fill="#22C55E"/>
+              <line x1="24" y1="20" x2="24" y2="58" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/>
+              <line x1="48" y1="20" x2="48" y2="58" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/>
+              <line x1="72" y1="20" x2="72" y2="58" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/>
+              <rect x="96" y="26" width="50" height="34" rx="6" fill="#166534"/>
+              <rect x="98" y="28" width="46" height="30" rx="5" fill="#15803D"/>
+              <rect x="106" y="30" width="28" height="16" rx="4" fill="#BAE6FD" opacity=".8"/>
+              <rect x="143" y="36" width="7" height="4" rx="2" fill="#FCD34D"/>
+              <circle cx="20" cy="62" r="9" fill="#1F2937"/><circle cx="20" cy="62" r="4" fill="#374151"/>
+              <circle cx="78" cy="62" r="9" fill="#1F2937"/><circle cx="78" cy="62" r="4" fill="#374151"/>
+              <circle cx="133" cy="62" r="9" fill="#1F2937"/><circle cx="133" cy="62" r="4" fill="#374151"/>
+              <text x="6" y="43" font-family="sans-serif" font-size="8" font-weight="bold" fill="rgba(255,255,255,.85)">CARGOLINK</text>
+            </svg>
+          </div>
+          <div class="road"><div class="roadln"></div></div>
+        </div>
+        <div class="pdash">
+          <div class="mstats"><div class="mc"><div class="mcv g">€ 187</div><div class="mcl">Hoje</div></div><div class="mc"><div class="mcv">4</div><div class="mcl">Entregas</div></div></div>
+          <div class="di"><div class="diic a">🚛</div><div class="diinf"><div class="dirt">Lisboa → Porto</div><div class="dimt">Em curso · 8 min</div></div><div class="dipr">€34,80</div></div>
+          <div class="di"><div class="diic p">📦</div><div class="diinf"><div class="dirt">Coimbra → Aveiro</div><div class="dimt">Disponível · 200km</div></div><div class="dipr">€28,60</div></div>
+          <button class="stbtn">✅ Disponível para serviços</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="sec" id="feat">
+  <div class="si">
+    <div class="fu"><div class="stag">Funcionalidades</div><h2 class="stitle">Tudo o que precisas<br>numa só plataforma</h2><p class="ssub">Desenvolvida para operadores e clientes que valorizam simplicidade, velocidade e transparência.</p></div>
+    <div class="fg">
+      <div class="fc2 fu"><div class="fic">🗺️</div><div class="ftit">Rastreamento em tempo real</div><div class="fdesc">Acompanha cada entrega ao minuto. O cliente sabe sempre onde está a sua carga — sem chamadas, sem incerteza.</div></div>
+      <div class="fc2 fu"><div class="fic">💰</div><div class="ftit">Comissão dinâmica</div><div class="fdesc">Quanto melhor a tua avaliação, mais recebes. De 77% até 85% por entrega — sobe de nível automaticamente.</div></div>
+      <div class="fc2 fu"><div class="fic">💳</div><div class="ftit">Pagamento automático</div><div class="fdesc">Clientes pagam com cartão. Operadores recebem direto no IBAN após cada entrega confirmada. Sem burocracia.</div></div>
+      <div class="fc2 fu"><div class="fic">💬</div><div class="ftit">Chat integrado</div><div class="fdesc">Comunicação direta entre cliente e operador dentro da app. Sem partilhar números de telemóvel.</div></div>
+      <div class="fc2 fu"><div class="fic">⚡</div><div class="ftit">Pedido em 30 segundos</div><div class="fdesc">Origem, destino, tipo de carga e veículo. Operador notificado em segundos. Confirmação imediata.</div></div>
+      <div class="fc2 fu"><div class="fic">🌍</div><div class="ftit">Cobertura europeia</div><div class="fdesc">Portugal, Espanha, França, Alemanha e muito mais. Os operadores escolhem os países onde operam.</div></div>
+    </div>
+  </div>
+</section>
+<section class="dsec" id="dash">
+  <div class="si">
+    <div class="fu" style="text-align:center"><div class="stag">Dashboard</div><h2 class="stitle">Interface pensada<br>para o operador</h2><p class="ssub" style="margin:0 auto">Simples, rápida e funcional. Tudo o que precisas para gerir as tuas entregas num único ecrã.</p></div>
+    <div class="dprev fu">
+      <div class="dhd"><div class="dhlogo">CargoLink · Dashboard</div><div class="dhr"><div class="dstog"><div class="dsdot"></div><span class="dstxt">Disponível</span></div><div class="dusr">JM</div></div></div>
+      <div class="dbody">
+        <div class="dsb">
+          <div class="dsbt">Menu</div>
+          <div class="dni on">📊 Dashboard</div>
+          <div class="dni">📦 Pedidos</div>
+          <div class="dni">💰 Ganhos</div>
+          <div class="dni">🗺️ Mapa</div>
+          <div class="dni">⭐ Avaliações</div>
+          <div class="dsep"></div>
+          <div class="zl">Países activos</div>
+          <div class="zi on" onclick="this.classList.toggle('on')"><span>🇵🇹</span> Portugal <span class="zck">✓</span></div>
+          <div class="zi on" onclick="this.classList.toggle('on')"><span>🇪🇸</span> Espanha <span class="zck">✓</span></div>
+          <div class="zi" onclick="this.classList.toggle('on')"><span>🇫🇷</span> França <span class="zck">✓</span></div>
+          <div class="zi" onclick="this.classList.toggle('on')"><span>🇩🇪</span> Alemanha <span class="zck">✓</span></div>
+          <div class="zi" onclick="this.classList.toggle('on')"><span>🇬🇧</span> UK <span class="zck">✓</span></div>
+        </div>
+        <div class="dm">
+          <div class="dsr">
+            <div class="dsc"><div class="dscv g">€ 2.847</div><div class="dscl">Ganhos mês</div><div class="dsct">↑ +18%</div></div>
+            <div class="dsc"><div class="dscv">47</div><div class="dscl">Serviços</div><div class="dsct">↑ +6</div></div>
+            <div class="dsc"><div class="dscv g">4.87 ★</div><div class="dscl">Avaliação</div><div class="dsct">Silver ⭐</div></div>
+            <div class="dsc"><div class="dscv">3.214</div><div class="dscl">km</div><div class="dsct">↑ +420</div></div>
+          </div>
+          <div class="dot">Pedidos disponíveis</div>
+          <div class="doc nw"><div class="docic">🚛</div><div class="docinf"><div class="docrt">Lisboa → Porto</div><div class="docmt">🚐 Carrinha · 200km · 📦 Caixas · 150kg</div></div><div class="docr"><div class="docpr">€ 34,80</div><div class="docbg bn">Novo</div></div></div>
+          <div class="doc"><div class="docic or">📦</div><div class="docinf"><div class="docrt">Coimbra → Aveiro</div><div class="docmt">🚐 Carrinha · 80km · 🪵 Madeira · 400kg</div></div><div class="docr"><div class="docpr">€ 18,20</div><div class="docbg bg2">Disponível</div></div></div>
+          <button class="accbtn" onclick="location.href='entrar.html?tipo=operador'">✓ Aceitar entrega — €34,80</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="sec" id="como">
+  <div class="si">
+    <div class="fu"><div class="stag">Como funciona</div><h2 class="stitle">Simples para todos</h2></div>
+    <div class="hwg">
+      <div class="hws fu">
+        <div class="hws-step"><div class="snum on">1</div><div class="stxt"><h4>Regista-te gratuitamente</h4><p>Cria a tua conta em menos de 2 minutos. Como cliente ou operador — sem mensalidades.</p></div></div>
+        <div class="hws-step"><div class="snum">2</div><div class="stxt"><h4>Cria ou aceita um pedido</h4><p>Clientes descrevem a carga. Operadores recebem notificação imediata e aceitam com um toque.</p></div></div>
+        <div class="hws-step"><div class="snum">3</div><div class="stxt"><h4>Entrega com rastreamento</h4><p>Cliente acompanha em tempo real. Chat integrado. Tudo dentro da app.</p></div></div>
+        <div class="hws-step"><div class="snum">4</div><div class="stxt"><h4>Pagamento automático</h4><p>Após entrega confirmada, o operador recebe no IBAN. Sem esperas, sem burocracia.</p></div></div>
+      </div>
+      <div class="mapv fu">
+        <div class="mgr"></div>
+        <div class="mrh" style="top:42%;left:0;right:0;height:10px"></div>
+        <div class="mrh" style="top:68%;left:0;right:0;height:6px"></div>
+        <div class="mrv" style="left:28%;top:0;bottom:0;width:8px"></div>
+        <div class="mrv" style="left:65%;top:0;bottom:0;width:6px"></div>
+        <div class="mbl" style="top:8%;left:4%;width:20%;height:28%"></div>
+        <div class="mbl" style="top:8%;left:34%;width:26%;height:24%"></div>
+        <div class="mbl" style="top:8%;right:4%;width:22%;height:26%"></div>
+        <div class="mbl" style="top:54%;left:4%;width:20%;height:28%"></div>
+        <div class="mbl" style="top:54%;left:34%;width:26%;height:26%"></div>
+        <div class="mbl" style="top:54%;right:4%;width:22%;height:28%"></div>
+        <svg class="rsvg" viewBox="0 0 400 300"><defs><linearGradient id="rg2" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22C55E" stop-opacity=".3"/><stop offset="50%" stop-color="#22C55E"/><stop offset="100%" stop-color="#22C55E" stop-opacity=".3"/></linearGradient></defs><path d="M 60 135 Q 100 115 150 130 Q 200 148 260 112 Q 300 82 350 118" stroke="url(#rg2)" stroke-width="2.5" fill="none" stroke-dasharray="8,4"><animate attributeName="stroke-dashoffset" from="0" to="-120" dur="3s" repeatCount="indefinite"/></path></svg>
+        <div class="mpg" style="left:14%;top:38%;transform:translate(-50%,-100%)"><div class="mpgb"><div class="mpgd"></div></div></div>
+        <div class="mpg" style="right:10%;top:28%;transform:translate(50%,-100%)"><div class="mpgb"><div class="mpgd"></div></div></div>
+        <div class="trkm">🚛</div>
+        <div class="ib" style="top:10px;left:10px"><div class="ibl">Partida</div><div class="ibv">Lisboa</div></div>
+        <div class="ib" style="bottom:10px;right:10px"><div class="ibl">Destino · ETA</div><div class="ibv" style="color:var(--p)">Porto · 2h 10m</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="csec" id="countries">
+  <div class="si">
+    <div class="fu" style="text-align:center"><div class="stag">Cobertura</div><h2 class="stitle">Escolhe os países<br>onde operas</h2><p class="ssub" style="margin:0 auto">Os operadores definem os países onde estão disponíveis. Clientes filtram por destino.</p></div>
+    <div class="cg fu">
+      <div class="cc on" onclick="toggleCC(this)"><span class="cf">🇵🇹</span><div class="cn">Portugal</div><div class="cs ac"><div class="csd"></div>Selecionado</div></div>
+      <div class="cc" onclick="toggleCC(this)"><span class="cf">🇪🇸</span><div class="cn">Espanha</div><div class="cs av">Disponível</div></div>
+      <div class="cc" onclick="toggleCC(this)"><span class="cf">🇫🇷</span><div class="cn">França</div><div class="cs av">Disponível</div></div>
+      <div class="cc" onclick="toggleCC(this)"><span class="cf">🇩🇪</span><div class="cn">Alemanha</div><div class="cs av">Disponível</div></div>
+      <div class="cc" onclick="toggleCC(this)"><span class="cf">🇬🇧</span><div class="cn">Reino Unido</div><div class="cs av">Disponível</div></div>
+      <div class="cc" onclick="toggleCC(this)"><span class="cf">🇳🇱</span><div class="cn">Holanda</div><div class="cs av">Disponível</div></div>
+      <div class="cc" onclick="toggleCC(this)"><span class="cf">🇧🇪</span><div class="cn">Bélgica</div><div class="cs av">Disponível</div></div>
+      <div class="cc" onclick="toggleCC(this)"><span class="cf">🇮🇹</span><div class="cn">Itália</div><div class="cs sn">Em breve</div></div>
+      <div class="cc" onclick="toggleCC(this)"><span class="cf">🇵🇱</span><div class="cn">Polónia</div><div class="cs sn">Em breve</div></div>
+      <div class="cc" onclick="toggleCC(this)"><span class="cf">🇨🇭</span><div class="cn">Suíça</div><div class="cs sn">Em breve</div></div>
+      <div class="cc" onclick="toggleCC(this)"><span class="cf">🇦🇹</span><div class="cn">Áustria</div><div class="cs sn">Em breve</div></div>
+      <div class="cc" onclick="toggleCC(this)"><span class="cf">🇸🇪</span><div class="cn">Suécia</div><div class="cs sn">Em breve</div></div>
+    </div>
+    <p style="text-align:center;margin-top:1.4rem;font-size:.83rem;color:var(--tx2)">Clica num país para simular a seleção como operador.</p>
+  </div>
+</section>
+<section class="tsec" id="tiers">
+  <div class="si">
+    <div class="fu" style="text-align:center"><div class="stag">Comissões</div><h2 class="stitle">Mais qualidade,<br>mais ganhos</h2><p class="ssub" style="margin:0 auto">A tua comissão aumenta automaticamente com base na tua avaliação.</p></div>
+    <div class="tg fu">
+      <div class="tc"><div class="tbg st">Padrão</div><div class="tpct"><span class="ps">%</span>77</div><div class="trat">Avaliação ≤ 4.7 ★</div><div class="tdesc">Nível de entrada. Entrega com qualidade e sobe automaticamente assim que a avaliação subir.</div></div>
+      <div class="tc ft"><div class="tbg sl">⭐ Silver</div><div class="tpct g"><span class="ps">%</span>80</div><div class="trat">Avaliação ≥ 4.8 ★</div><div class="tdesc">Para operadores consistentes. 3% a mais em cada entrega — acumula ao longo do mês.</div></div>
+      <div class="tc"><div class="tbg gd">🏆 Gold</div><div class="tpct" style="color:#D97706"><span class="ps">%</span>85</div><div class="trat">Avaliação ≥ 4.9 ★</div><div class="tdesc">O máximo da plataforma. Os melhores operadores recebem 85% de cada serviço.</div></div>
+    </div>
+    <div style="background:#fff;border-radius:var(--rl);padding:1.4rem;margin-top:1.8rem;border:1.5px solid #FCA5A5;display:flex;align-items:flex-start;gap:.9rem;" class="fu">
+      <div style="font-size:1.4rem;flex-shrink:0">⚠️</div>
+      <div><div style="font-weight:700;color:#B91C1C;margin-bottom:.28rem">Avaliação ≤ 3.9 ★ — Período de melhoria</div><div style="font-size:.83rem;color:var(--tx2);line-height:1.6">O operador tem <strong>2 meses</strong> para melhorar. Se não for atingido, a conta é suspensa e o operador dispõe de <strong>30 dias</strong> para levantar os fundos disponíveis.</div></div>
+    </div>
+  </div>
+</section>
+<section class="ctas">
+  <div class="ctai">
+    <h2>Pronto para começar?</h2>
+    <p>Junta-te aos milhares de clientes e operadores que já confiam no CargoLink.</p>
+    <div class="ctabs">
+      <button class="bwh" onclick="location.href='entrar.html'">📦 Sou cliente — quero enviar carga</button>
+      <button class="bwho" onclick="location.href='entrar.html?tipo=operador'">🚛 Sou operador — quero ganhar</button>
+    </div>
+  </div>
+</section>
+<footer>
+  <div class="fi">
+    <div class="ftop">
+      <div><div class="flogo">Cargo<span>Link</span></div><p class="fdesc">Plataforma portuguesa de intermediação de transporte. Simples, segura e transparente.</p></div>
+      <div class="fcol"><h4>Plataforma</h4><a href="#">Enviar carga</a><a href="#">Ser operador</a><a href="#">Preços</a><a href="#">App móvel</a></div>
+      <div class="fcol"><h4>Empresa</h4><a href="#">Sobre nós</a><a href="#">Blog</a><a href="#">Carreiras</a><a href="#">Imprensa</a></div>
+      <div class="fcol"><h4>Suporte</h4><a href="#">Centro de apoio</a><a href="#">Contacto</a><a href="#">Termos</a><a href="#">Privacidade</a></div>
+    </div>
+    <div class="fbot"><p>© 2026 CargoLink Grupo. Plataforma de intermediação — não prestamos serviços de transporte.</p><div class="fmade">Feito <span>♥</span> em Portugal · Pagamentos via <span>Stripe</span></div></div>
+  </div>
+</footer>
+<script>
+function toggleCC(el){
+  el.classList.toggle("on");
+  const s=el.querySelector(".cs");
+  if(el.classList.contains("on")){s.className="cs ac";s.innerHTML='<div class="csd"></div>Selecionado';}
+  else{s.className="cs av";s.textContent="Disponível";}
+}
+const obs=new IntersectionObserver((e)=>{e.forEach(en=>{if(en.isIntersecting)en.target.classList.add("vis");});},{threshold:.1});
+document.querySelectorAll(".fu").forEach(el=>obs.observe(el));
+window.addEventListener("scroll",()=>{document.querySelector("nav").style.boxShadow=window.scrollY>40?"0 2px 20px rgba(0,0,0,.07)":"none";});
+</script>
+</body>
+</html>
