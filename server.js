@@ -315,6 +315,17 @@ app.post('/operador/online', async (req, res) => {
 });
 
 // ── PAGAMENTOS ──
+app.post('/operador/guardar-iban', async (req, res) => {
+  const { operador_id, iban, titular } = req.body;
+  if (!operador_id || !iban) return res.status(400).json({ erro: 'Dados incompletos' });
+  const { error } = await supabase
+    .from('utilizadores')
+    .update({ iban, iban_titular: titular })
+    .eq('id', operador_id);
+  if (error) return res.status(400).json({ erro: error.message });
+  res.json({ sucesso: true });
+});
+
 app.post('/operador/criar-conta', async (req, res) => {
   const { email, nome, utilizador_id } = req.body;
   try {
