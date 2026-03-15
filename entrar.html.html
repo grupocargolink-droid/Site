@@ -1,0 +1,693 @@
+<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>CargoLink — App</title><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"><script>
+const MAPBOX_TOKEN = 'pk.eyJ1IjoiZ3J1cG9jYXJnb2xpbmsiLCJhIjoiY21tcm8xOWcyMHYzMTJwcjJzZzR3bnl4dyJ9.qTPo14zk0sMUXlw7lj67Vg';
+const STRIPE_KEY='pk_live_51TAqCjCnRGwtav2zcyULJyFGJN6i4o5y9e5pZOW8R3NbuT6JFaq6gM8aZlxJ80fvNScjuOgN8f1YIyYaJKhRIi6L004MVIJLH2';
+let stripeInstance=null,cardElement=null;
+</script><style>*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}html,body{height:100%;overflow:hidden;}:root{--p:#22C55E;--pd:#16A34A;--pl:#DCFCE7;--pm:#BBF7D0;--bg:#fff;--bg2:#F5F5F5;--bg3:#F0FDF4;--tx:#111111;--tx2:#6B7280;--tx3:#9CA3AF;--bd:#E5E7EB;--rd:#EF4444;--sh:0 4px 16px rgba(0,0,0,.08);--shl:0 8px 32px rgba(0,0,0,.1);--shxl:0 20px 60px rgba(0,0,0,.12);--r:16px;--rl:20px;--rxl:24px;}body{font-family:"Plus Jakarta Sans",sans-serif;color:var(--tx);background:var(--bg);} #splash{position:fixed;inset:0;background:var(--p);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .5s;}#splash.hide{opacity:0;pointer-events:none;}.sp-logo{font-family:"Plus Jakarta Sans",sans-serif;font-size:2.8rem;font-weight:800;color:#fff;letter-spacing:-.04em;}.sp-logo span{color:rgba(255,255,255,.65);}.sp-sub{font-size:.7rem;font-weight:500;letter-spacing:.35em;color:rgba(255,255,255,.5);text-transform:uppercase;margin-top:.3rem;}.sp-bar{width:48px;height:3px;background:rgba(255,255,255,.25);border-radius:2px;margin-top:2.5rem;overflow:hidden;}.sp-fill{height:100%;background:#fff;border-radius:2px;animation:spld 1.2s ease forwards;}@keyframes spld{from{width:0}to{width:100%}} #auth{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;flex-direction:column;overflow-y:auto;}#auth.gone{display:none;}.auth-wrap{max-width:420px;margin:auto;padding:2rem 1.5rem;width:100%;}.auth-logo{font-size:1.6rem;font-weight:800;color:var(--tx);letter-spacing:-.04em;margin-bottom:2.5rem;display:flex;align-items:center;gap:.5rem;}.auth-logo span{color:var(--p);}.auth-logo-dot{width:8px;height:8px;background:var(--p);border-radius:50%;animation:bl 2s infinite;}@keyframes bl{0%,100%{opacity:1}50%{opacity:.25}}.auth-title{font-size:1.9rem;font-weight:800;color:var(--tx);line-height:1.1;letter-spacing:-.03em;margin-bottom:.4rem;}.auth-sub{font-size:.88rem;color:var(--tx2);margin-bottom:2rem;line-height:1.6;}.auth-tabs{display:flex;background:var(--bg2);border-radius:12px;padding:.3rem;margin-bottom:1.8rem;gap:.3rem;}.auth-tab{flex:1;padding:.6rem;border:none;border-radius:9px;background:transparent;color:var(--tx2);font-family:"Plus Jakarta Sans",sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s;}.auth-tab.on{background:#fff;color:var(--tx);box-shadow:0 1px 4px rgba(0,0,0,.08);}.auth-err{background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:.65rem .9rem;font-size:.82rem;color:var(--rd);margin-bottom:1rem;display:none;}.auth-lbl{font-size:.75rem;font-weight:700;color:var(--tx2);margin-bottom:.4rem;display:block;text-transform:uppercase;letter-spacing:.06em;}.auth-input{width:100%;background:var(--bg2);border:1.5px solid var(--bd);border-radius:12px;padding:.8rem 1rem;font-family:"Plus Jakarta Sans",sans-serif;font-size:.95rem;color:var(--tx);outline:none;margin-bottom:1rem;transition:all .2s;}.auth-input:focus{border-color:var(--p);background:#fff;box-shadow:0 0 0 3px rgba(34,197,94,.1);}.auth-select{width:100%;background:var(--bg2);border:1.5px solid var(--bd);border-radius:12px;padding:.8rem 1rem;font-family:"Plus Jakarta Sans",sans-serif;font-size:.95rem;color:var(--tx);outline:none;margin-bottom:1rem;appearance:none;cursor:pointer;}.auth-select:focus{border-color:var(--p);}.auth-forgot{text-align:right;margin-top:-.5rem;margin-bottom:1rem;}.auth-forgot span{font-size:.8rem;color:var(--p);cursor:pointer;font-weight:600;}.btn-main{width:100%;padding:.95rem;border:none;border-radius:12px;background:var(--p);color:#fff;font-family:"Plus Jakarta Sans",sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;margin-top:.3rem;}.btn-main:hover{background:var(--pd);transform:translateY(-1px);box-shadow:0 6px 20px rgba(34,197,94,.3);}.btn-main:disabled{opacity:.5;cursor:not-allowed;transform:none;}.auth-ok{background:#F0FDF4;border:1px solid var(--pm);border-radius:10px;padding:.65rem .9rem;font-size:.82rem;color:var(--pd);margin-bottom:1rem;display:none;} #fgt{position:fixed;inset:0;background:var(--bg);z-index:1100;display:none;flex-direction:column;overflow-y:auto;}#fgt.show{display:flex;}.fgt-wrap{max-width:420px;margin:auto;padding:2rem 1.5rem;width:100%;}.fgt-back{display:flex;align-items:center;gap:.6rem;margin-bottom:2rem;cursor:pointer;font-size:.88rem;font-weight:600;color:var(--tx2);}.fgt-back:hover{color:var(--tx);} #app{display:none;height:100vh;flex-direction:column;overflow:hidden;}#app.show{display:flex;} .topbar{background:#fff;border-bottom:1px solid var(--bd);padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:50;}.topbar-logo{font-size:1.1rem;font-weight:800;color:var(--tx);letter-spacing:-.03em;}.topbar-logo span{color:var(--p);}.topbar-right{display:flex;align-items:center;gap:.6rem;}.topbar-badge{background:var(--pl);color:var(--pd);font-size:.62rem;font-weight:700;padding:.2rem .6rem;border-radius:20px;text-transform:uppercase;letter-spacing:.05em;}.topbar-notif{position:relative;width:34px;height:34px;border-radius:50%;background:var(--bg2);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.95rem;}.ndot{position:absolute;top:4px;right:4px;width:7px;height:7px;background:var(--p);border-radius:50%;border:2px solid #fff;display:none;}.ndot.on{display:block;}.topbar-logout{background:var(--bg2);border:none;color:var(--tx2);font-size:.75rem;padding:.3rem .65rem;border-radius:8px;cursor:pointer;font-family:"Plus Jakarta Sans",sans-serif;font-weight:600;} .app-content{flex:1;overflow:hidden;position:relative;} .mapbg{width:100%;height:100%;background:linear-gradient(160deg,#f0fdf4 0%,#dcfce7 100%);position:relative;overflow:hidden;}#gmap-c,#gmap-o{width:100%;height:100%;display:none;}.gmap-active{display:block!important;}.route-info-bar{position:absolute;bottom:0;left:0;right:0;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);padding:.6rem 1rem;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--bd);z-index:20;}.route-info-bar.hidden{display:none;}.ri-item{text-align:center;}.ri-val{font-size:1rem;font-weight:800;color:var(--tx);letter-spacing:-.02em;}.ri-val.g{color:var(--pd);}.ri-lbl{font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);margin-top:.05rem;}.ri-sep{width:1px;height:30px;background:var(--bd);}.btn-nav{background:var(--p);border:none;border-radius:10px;color:#fff;font-family:"Plus Jakarta Sans",sans-serif;font-size:.8rem;font-weight:700;padding:.5rem .9rem;cursor:pointer;display:flex;align-items:center;gap:.35rem;}.autocomplete-wrap{position:relative;}.autocomplete-dropdown{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--bd);border-radius:0 0 12px 12px;box-shadow:var(--shl);z-index:100;max-height:180px;overflow-y:auto;display:none;}.autocomplete-dropdown.show{display:block;}.ac-item{padding:.65rem .9rem;font-size:.83rem;cursor:pointer;border-bottom:1px solid var(--bg2);display:flex;align-items:center;gap:.6rem;}.ac-item:hover{background:var(--bg3);}.ac-item:last-child{border-bottom:none;}.ac-icon{font-size:.9rem;color:var(--tx2);}.ac-main{font-weight:600;color:var(--tx);}.ac-sub{font-size:.7rem;color:var(--tx2);}.tracker-pulse{position:absolute;transform:translate(-50%,-50%);z-index:15;}.tracker-dot{width:16px;height:16px;background:var(--p);border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(34,197,94,.4);}.tracker-ring{position:absolute;inset:-5px;border-radius:50%;border:2px solid rgba(34,197,94,.3);animation:pp 2s infinite;}.mgrid{position:absolute;inset:0;background-image:linear-gradient(rgba(34,197,94,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(34,197,94,.05) 1px,transparent 1px);background-size:28px 28px;}.mroad{position:absolute;background:rgba(255,255,255,.85);}.mblock{position:absolute;background:rgba(34,197,94,.08);border-radius:3px;}.mlbl{position:absolute;font-size:.58rem;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.04em;}.pin-u{position:absolute;transform:translate(-50%,-50%);z-index:10;}.pin-u-d{width:13px;height:13px;background:var(--pd);border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(22,163,74,.4);}.pin-u-r{position:absolute;inset:-5px;border-radius:50%;border:2px solid rgba(34,197,94,.25);animation:pp 2s infinite;}@keyframes pp{0%{transform:scale(1);opacity:1}100%{transform:scale(2.5);opacity:0}}.pin-d{position:absolute;transform:translate(-50%,-100%);z-index:10;}.pin-d-b{width:18px;height:23px;background:var(--p);border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 3px 10px rgba(34,197,94,.4);}.pin-d-dot{width:6px;height:6px;background:#fff;border-radius:50%;position:absolute;top:4px;left:4px;}.mveh{position:absolute;transform:translate(-50%,-50%);z-index:8;font-size:1.2rem;filter:drop-shadow(0 2px 4px rgba(0,0,0,.2));transition:all .6s ease;}.map-status-pill{position:absolute;top:.7rem;left:50%;transform:translateX(-50%);background:#fff;border-radius:20px;padding:.3rem .85rem;box-shadow:var(--sh);font-size:.7rem;font-weight:700;color:var(--pd);white-space:nowrap;display:flex;align-items:center;gap:.4rem;z-index:20;} .sheet{position:absolute;bottom:0;left:0;right:0;background:#fff;border-radius:20px 20px 0 0;box-shadow:0 -4px 30px rgba(0,0,0,.1);z-index:30;}.shandle{width:36px;height:4px;background:var(--bd);border-radius:2px;margin:.7rem auto .4rem;}.sscroll{overflow-y:auto;max-height:60vh;} .order-q{padding:.6rem 1rem .3rem;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--tx2);}.rinput-row{display:flex;align-items:center;gap:.7rem;background:var(--bg2);border-radius:12px;padding:.7rem .9rem;margin:0 1rem .5rem;}.rdot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}.rdot.o{background:var(--tx);}.rdot.d{background:var(--p);}.rinput{border:none;background:transparent;font-family:"Plus Jakarta Sans",sans-serif;font-size:.9rem;color:var(--tx);outline:none;flex:1;}.rinput::placeholder{color:#C0C0C0;} .vgrid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;padding:.5rem 1rem .9rem;}.vcard{border:1.5px solid var(--bd);border-radius:14px;padding:.75rem .85rem;cursor:pointer;transition:all .2s;background:#fff;display:flex;align-items:center;gap:.7rem;}.vcard:hover{border-color:var(--p);background:var(--bg3);}.vcard.on{border-color:var(--p);background:var(--bg3);box-shadow:0 0 0 3px rgba(34,197,94,.1);}.vcard-ic{font-size:1.4rem;flex-shrink:0;width:34px;text-align:center;}.vcard-info{flex:1;min-width:0;}.vcard-name{font-size:.8rem;font-weight:700;color:var(--tx);}.vcard-cap{font-size:.67rem;font-weight:700;color:var(--pd);margin-top:.08rem;}.vcard-desc{font-size:.61rem;color:var(--tx2);margin-top:.08rem;line-height:1.3;display:none;}.vcard.on .vcard-desc{display:block;}.vcard-chk{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--bd);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.6rem;color:transparent;transition:all .2s;}.vcard.on .vcard-chk{background:var(--p);border-color:var(--p);color:#fff;} .prow{display:flex;justify-content:space-between;align-items:center;padding:.5rem 1rem .8rem;}.pval{font-size:1.5rem;font-weight:800;color:var(--tx);letter-spacing:-.03em;}.pnote{font-size:.68rem;color:var(--tx2);margin-top:.1rem;} .btn-green{width:calc(100% - 2rem);margin:0 1rem .9rem;padding:.9rem;border:none;border-radius:12px;background:var(--p);color:#fff;font-family:"Plus Jakarta Sans",sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:.4rem;}.btn-green:hover{background:var(--pd);}.btn-green:disabled{opacity:.5;}.btn-outline{width:calc(100% - 2rem);margin:0 1rem .9rem;padding:.85rem;border:1.5px solid var(--p);border-radius:12px;background:#fff;color:var(--pd);font-family:"Plus Jakarta Sans",sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;} .op-found{padding:.8rem 1rem;}.op-found-top{display:flex;align-items:center;gap:.8rem;margin-bottom:.7rem;}.op-av{width:48px;height:48px;border-radius:50%;background:var(--pl);color:var(--pd);font-size:1.1rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;}.op-vbadge{position:absolute;bottom:-3px;right:-3px;background:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.78rem;box-shadow:var(--sh);}.op-info{flex:1;}.op-name{font-weight:700;font-size:.92rem;}.op-rating{font-size:.75rem;color:var(--tx2);margin-top:.08rem;display:flex;align-items:center;gap:.2rem;}.op-rating-star{color:#F59E0B;}.op-vtext{font-size:.72rem;color:var(--tx2);margin-top:.1rem;}.op-eta{text-align:right;}.op-eta-n{font-size:1.6rem;font-weight:800;color:var(--tx);line-height:1;letter-spacing:-.03em;}.op-eta-l{font-size:.6rem;color:var(--tx2);text-transform:uppercase;}.vimg-card{background:var(--bg2);border-radius:12px;padding:.6rem .9rem;display:flex;align-items:center;gap:.7rem;margin-bottom:.7rem;}.vimg-ic{font-size:2rem;flex-shrink:0;}.vimg-info{flex:1;}.vimg-mod{font-size:.85rem;font-weight:700;}.vimg-pl{font-size:.72rem;color:var(--tx2);margin-top:.05rem;}.vimg-cap{font-size:.7rem;color:var(--pd);font-weight:600;margin-top:.1rem;}.act-row{display:flex;gap:.5rem;margin-bottom:.7rem;}.act-btn{flex:1;background:var(--bg2);border:none;border-radius:10px;padding:.65rem .4rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:.2rem;transition:background .2s;}.act-btn:hover{background:var(--pl);}.act-btn-ic{font-size:1.05rem;}.act-btn-lb{font-size:.6rem;font-weight:700;color:var(--tx);} .trk-wrap{padding:.5rem 1rem .8rem;}.trk-row{display:flex;align-items:flex-start;gap:.7rem;margin-bottom:.35rem;}.trk-col{display:flex;flex-direction:column;align-items:center;width:11px;flex-shrink:0;}.trk-c{width:11px;height:11px;border-radius:50%;}.trk-c.dn{background:var(--p);}.trk-c.ac{background:var(--tx);box-shadow:0 0 0 3px rgba(17,17,17,.1);}.trk-c.wt{background:var(--bd);}.trk-lv{width:2px;height:16px;background:var(--bd);margin:.18rem 0;}.trk-lv.dn{background:var(--p);}.trk-t{font-size:.82rem;padding-top:.05rem;}.trk-t.dn{color:var(--pd);font-weight:600;}.trk-t.ac{color:var(--tx);font-weight:700;}.trk-t.wt{color:var(--tx2);} .chat-scr{display:flex;flex-direction:column;height:100%;}.chat-top{padding:.75rem 1rem;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:.7rem;background:#fff;flex-shrink:0;}.chat-back{width:32px;height:32px;border:none;background:none;cursor:pointer;font-size:1.1rem;color:var(--tx2);}.chat-msgs{flex:1;overflow-y:auto;padding:.8rem;background:var(--bg2);display:flex;flex-direction:column;gap:.5rem;}.msg{max-width:78%;padding:.65rem .9rem;border-radius:14px;font-size:.85rem;line-height:1.4;}.mo{background:var(--p);color:#fff;align-self:flex-end;border-bottom-right-radius:4px;}.mi{background:#fff;color:var(--tx);align-self:flex-start;border-bottom-left-radius:4px;box-shadow:0 1px 4px rgba(0,0,0,.06);}.mtime{font-size:.56rem;opacity:.5;margin-top:.15rem;}.chat-bar{padding:.6rem .8rem;background:#fff;border-top:1px solid var(--bd);display:flex;gap:.5rem;align-items:center;flex-shrink:0;}.chat-fld{flex:1;background:var(--bg2);border:none;border-radius:20px;padding:.55rem .9rem;font-family:"Plus Jakarta Sans",sans-serif;font-size:.88rem;outline:none;}.chat-send{width:34px;height:34px;border-radius:50%;background:var(--p);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;} .hitem{display:flex;align-items:center;gap:.8rem;padding:.85rem 1rem;border-bottom:1px solid var(--bd);background:#fff;}.hitem-ic{width:40px;height:40px;border-radius:12px;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}.hitem-inf{flex:1;}.hitem-rt{font-weight:700;font-size:.88rem;}.hitem-mt{font-size:.7rem;color:var(--tx2);margin-top:.08rem;}.hitem-r{text-align:right;}.hitem-pr{font-size:.95rem;font-weight:800;color:var(--pd);}.hbadge{font-size:.6rem;font-weight:700;padding:.12rem .4rem;border-radius:5px;margin-top:.18rem;display:inline-block;}.hbd{background:var(--pl);color:var(--pd);}.hbp{background:#FEF3C7;color:#92400E;} .prof-hd{background:linear-gradient(135deg,var(--pd),var(--p));padding:1.5rem 1rem;color:#fff;display:flex;align-items:center;gap:.9rem;}.prof-av{width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,.25);color:#fff;font-size:1.5rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:3px solid rgba(255,255,255,.4);}.prof-nm{font-size:1.2rem;font-weight:800;letter-spacing:-.02em;}.prof-em{font-size:.75rem;opacity:.7;margin-top:.08rem;}.prof-badge{display:inline-block;background:rgba(255,255,255,.2);border-radius:20px;padding:.2rem .65rem;font-size:.65rem;font-weight:700;margin-top:.35rem;text-transform:uppercase;letter-spacing:.04em;}.prof-menu{background:#fff;}.prof-row{display:flex;align-items:center;gap:.8rem;padding:.95rem 1rem;border-bottom:1px solid var(--bd);cursor:pointer;transition:background .15s;}.prof-row:active{background:var(--bg2);}.prof-ic{width:38px;height:38px;border-radius:11px;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}.prof-tx{flex:1;}.prof-title{font-size:.88rem;font-weight:700;}.prof-sub{font-size:.72rem;color:var(--tx2);margin-top:.08rem;}.prof-arr{color:var(--bd);font-size:.9rem;} .op-toggle{padding:.7rem 1rem;background:#fff;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;}.op-status{font-weight:700;font-size:.9rem;}.op-status.on{color:var(--p);}.op-status.off{color:var(--tx2);}.sw{position:relative;width:48px;height:26px;}.sw input{opacity:0;width:0;height:0;}.swsl{position:absolute;inset:0;background:#D1D5DB;border-radius:26px;cursor:pointer;transition:.3s;}.swsl:before{content:"";position:absolute;width:20px;height:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;box-shadow:0 1px 3px rgba(0,0,0,.2);}input:checked+.swsl{background:var(--p);}input:checked+.swsl:before{transform:translateX(22px);}.order-card{margin:.7rem 1rem;border:1.5px solid var(--bd);border-radius:16px;overflow:hidden;}.oc-hd{background:var(--p);padding:.7rem 1rem;display:flex;justify-content:space-between;align-items:center;}.oc-tag{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.7);}.oc-pr{font-size:1.3rem;font-weight:800;color:#fff;}.oc-pr small{font-size:.6rem;font-weight:400;color:rgba(255,255,255,.6);}.oc-bd{padding:.8rem 1rem;}.oc-rt{font-weight:800;font-size:1rem;color:var(--tx);margin-bottom:.55rem;}.oc-meta{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-bottom:.7rem;}.meta-i{background:var(--bg2);border-radius:10px;padding:.5rem .7rem;}.meta-lb{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2);}.meta-vl{font-size:.83rem;font-weight:700;margin-top:.08rem;}.tbar{height:3px;background:var(--bd);border-radius:2px;margin-bottom:.7rem;overflow:hidden;}.tbar-fill{height:100%;background:var(--p);animation:tcd 30s linear forwards;}@keyframes tcd{from{width:100%}to{width:0%}}.oc-btns{display:grid;grid-template-columns:1fr 1.6fr;gap:.5rem;}.btn-dec{padding:.8rem;border:1.5px solid var(--bd);border-radius:10px;background:#fff;color:var(--tx2);font-family:"Plus Jakarta Sans",sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;}.btn-acc{padding:.8rem;border:none;border-radius:10px;background:var(--p);color:#fff;font-family:"Plus Jakarta Sans",sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;} .earn-hd{background:linear-gradient(135deg,var(--pd),var(--p));padding:1.3rem 1rem;color:#fff;}.earn-amt{font-size:2.6rem;font-weight:800;line-height:1;letter-spacing:-.04em;}.earn-lbl{font-size:.65rem;opacity:.6;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.2rem;}.earn-tier{display:inline-flex;align-items:center;gap:.3rem;background:rgba(255,255,255,.18);border-radius:20px;padding:.2rem .65rem;font-size:.68rem;font-weight:700;margin-top:.5rem;}.earn-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;padding:.7rem 1rem;}.earn-card{background:#fff;border-radius:12px;padding:.9rem;border:1px solid var(--bd);}.earn-val{font-size:1.4rem;font-weight:800;letter-spacing:-.03em;}.earn-val.g{color:var(--p);}.earn-clbl{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2);margin-top:.1rem;}.btn-cashout{width:calc(100% - 2rem);margin:.2rem 1rem .8rem;padding:.9rem;border:none;border-radius:12px;background:var(--p);color:#fff;font-family:"Plus Jakarta Sans",sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.4rem;} .rating-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:flex-end;justify-content:center;}.rating-ov.show{display:flex;}.rating-box{background:#fff;border-radius:24px 24px 0 0;padding:2rem 1.5rem;width:100%;max-width:480px;}.stars-row{display:flex;justify-content:center;gap:.7rem;margin:1rem 0 1.5rem;}.star-btn{font-size:2.2rem;opacity:.2;cursor:pointer;border:none;background:none;transition:all .15s;}.star-btn.lit{opacity:1;} .notif-panel{position:fixed;top:0;right:0;bottom:0;width:min(300px,90vw);background:#fff;box-shadow:-4px 0 20px rgba(0,0,0,.1);z-index:200;transform:translateX(100%);transition:transform .3s;}.notif-panel.open{transform:translateX(0);}.notif-hd{padding:.9rem 1rem;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;}.notif-hd-t{font-size:1rem;font-weight:800;color:var(--tx);}.ni-item{padding:.85rem 1rem;border-bottom:1px solid var(--bd);cursor:pointer;}.ni-item.ur{background:var(--bg3);}.ni-ti{font-size:.85rem;font-weight:700;}.ni-mg{font-size:.75rem;color:var(--tx2);margin-top:.18rem;line-height:1.4;}.ni-tm{font-size:.62rem;color:var(--tx3);margin-top:.25rem;} .bnav{background:#fff;border-top:1px solid var(--bd);display:flex;flex-shrink:0;}.nbtn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.55rem .2rem;border:none;background:transparent;cursor:pointer;color:var(--tx2);gap:.18rem;font-family:"Plus Jakarta Sans",sans-serif;transition:color .15s;}.nbtn.on{color:var(--p);}.nbtn-ic{font-size:1.15rem;line-height:1;}.nbtn-lb{font-size:.5rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}.ncta-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:.35rem .25rem;}.ncta-btn{background:var(--p);color:#fff;border:none;border-radius:12px;width:100%;padding:.55rem .25rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:.15rem;font-family:"Plus Jakarta Sans",sans-serif;}.ncta-btn.on{background:var(--pd);} .scrflex{display:none;height:100%;flex-direction:column;overflow:hidden;}.scrflex.on{display:flex;}.scrblock{display:none;height:100%;overflow-y:auto;background:var(--bg2);}.scrblock.on{display:block;}.sec-hdr{padding:.8rem 1rem .3rem;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--tx2);background:var(--bg2);} .empty{padding:3rem 1.2rem;text-align:center;}.pdetail-row{display:flex;justify-content:space-between;font-size:.78rem;color:var(--tx2);padding:.22rem 0;}.pdetail-row span:last-child{font-weight:600;color:var(--tx);}.pdetail-total{display:flex;justify-content:space-between;font-size:.85rem;font-weight:800;color:var(--pd);border-top:1px dashed var(--pm);margin-top:.4rem;padding-top:.4rem;} .sdot{width:8px;height:8px;border-radius:50%;background:var(--bd);flex-shrink:0;transition:all .3s;}.sdot.on{background:var(--p);box-shadow:0 0 0 3px rgba(34,197,94,.2);}.sdot.done{background:var(--pm);}.sdot-line{flex:1;height:2px;background:var(--bd);transition:background .3s;}.sdot-line.done{background:var(--pm);}.wstep{animation:fadeIn .25s ease;}@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}.wstep-q{font-size:.95rem;font-weight:800;color:var(--tx);letter-spacing:-.02em;padding:.2rem 1rem .7rem;}.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;padding:0 1rem .8rem;}.opt{border:1.5px solid var(--bd);border-radius:14px;padding:.75rem .8rem;cursor:pointer;transition:all .2s;background:#fff;font-size:.82rem;font-weight:700;color:var(--tx);}.opt:hover{border-color:var(--p);background:var(--bg3);}.opt.on{border-color:var(--p);background:var(--bg3);box-shadow:0 0 0 3px rgba(34,197,94,.1);}.opt-sub{font-size:.65rem;font-weight:400;color:var(--tx2);margin-top:.2rem;}.opt-list{display:flex;flex-direction:column;gap:.5rem;padding:0 1rem .8rem;}.opt-row{display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:.8rem .9rem!important;}.opt-title{font-size:.85rem;font-weight:700;color:var(--tx);}.opt-price{font-size:.8rem;font-weight:800;color:var(--pd);flex-shrink:0;}.opt-chkbox{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--bd);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:transparent;transition:all .2s;}.opt-check.on .opt-chkbox{background:var(--p);border-color:var(--p);color:#fff;}.resumo-item{display:flex;gap:.7rem;padding:.55rem .8rem;background:var(--bg2);border-radius:10px;margin-bottom:.4rem;align-items:flex-start;}.resumo-ic{font-size:1rem;flex-shrink:0;margin-top:.05rem;}.resumo-lbl{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);}.resumo-val{font-size:.85rem;font-weight:700;color:var(--tx);margin-top:.08rem;}.empty-ic{font-size:3rem;margin-bottom:.8rem;}.empty-ti{font-size:1.1rem;font-weight:800;color:var(--tx);letter-spacing:-.02em;margin-bottom:.4rem;}.empty-su{font-size:.82rem;color:var(--tx2);line-height:1.5;}@media(max-width:380px){.oc-meta{grid-template-columns:1fr;}.vgrid{grid-template-columns:1fr;}}</style></head><body><div id="splash"><div class="sp-logo">Cargo<span>Link</span></div><div class="sp-sub">grupo · portugal</div><div class="sp-bar"><div class="sp-fill"></div></div></div><div id="fgt"><div class="fgt-wrap"><div class="fgt-back" onclick="closeFgt()">← Voltar</div><div class="auth-logo">Cargo<span>Link</span><div class="auth-logo-dot"></div></div><div class="auth-title">Recuperar<br>password</div><div class="auth-sub">Indica o teu email e enviamos um link para criares uma nova password.</div><div class="auth-ok" id="fgt-ok">✅ Email enviado! Verifica a caixa de entrada e segue as instruções.</div><div class="auth-err" id="fgt-err"></div><label class="auth-lbl">Email</label><input class="auth-input" type="email" id="fgt-em" placeholder="o.teu@email.com"><button class="btn-main" onclick="sendFgt()">📧 Enviar link de recuperação</button></div></div><div id="auth"><div class="auth-wrap"><div class="auth-logo">Cargo<span>Link</span><div class="auth-logo-dot"></div></div><div class="auth-tabs"><button class="auth-tab on" id="tab-login" onclick="swTab('login')">Entrar</button><button class="auth-tab" id="tab-reg" onclick="swTab('reg')">Registar</button></div><div id="av-login"><div class="auth-title">Bem-vindo<br>de volta</div><div class="auth-sub">Entra na tua conta CargoLink.</div><div class="auth-err" id="l-err"></div><label class="auth-lbl">Email</label><input class="auth-input" type="email" id="l-em" placeholder="o.teu@email.com"><label class="auth-lbl">Password</label><input class="auth-input" type="password" id="l-pw" placeholder="••••••••"><div class="auth-forgot"><span onclick="openFgt()">Esqueci-me da password</span></div></div><div id="av-reg" style="display:none"><div class="auth-title">Criar<br>conta</div><div class="auth-sub">Regista-te como cliente ou operador.</div><div class="auth-err" id="r-err"></div><label class="auth-lbl">Nome completo</label><input class="auth-input" type="text" id="r-nm" placeholder="João Silva"><label class="auth-lbl">Email</label><input class="auth-input" type="email" id="r-em" placeholder="o.teu@email.com"><label class="auth-lbl">Password</label><input class="auth-input" type="password" id="r-pw" placeholder="Mínimo 8 caracteres"><label class="auth-lbl">Sou</label><select class="auth-select" id="r-tp"><option value="cliente">👤 Cliente — quero enviar carga</option><option value="operador">🚛 Operador — quero ganhar dinheiro</option></select></div><button class="btn-main" id="a-btn" onclick="doAuth()">Entrar →</button></div></div><div id="app"><div class="topbar"><div class="topbar-logo">Cargo<span>Link</span></div><div class="topbar-right"><span id="tb-nome" style="font-size:.82rem;font-weight:600;color:var(--tx2)"></span><span class="topbar-badge" id="tb-tipo">Cliente</span><button class="topbar-notif" onclick="toggleNotif()" style="position:relative">
+🔔<div class="ndot on" id="ndot"></div></button><button class="topbar-logout" onclick="doLogout()">Sair</button></div></div><div class="notif-panel" id="npanel"><div class="notif-hd"><div class="notif-hd-t">Notificações</div><button onclick="toggleNotif()" style="border:none;background:none;cursor:pointer;font-size:1rem;color:var(--tx2)">✕</button></div><div class="ni-item ur"><div class="ni-ti">Novo pedido disponível</div><div class="ni-mg">Lisboa → Porto · Carrinha · recebes €34,80</div><div class="ni-tm">Agora mesmo</div></div><div class="ni-item"><div class="ni-ti">Pagamento recebido</div><div class="ni-mg">€34,80 transferido para o teu IBAN</div><div class="ni-tm">Há 2 horas</div></div></div><div class="rating-ov" id="rating-ov"><div class="rating-box"><div style="text-align:center"><div style="font-size:2.4rem;margin-bottom:.4rem">🎉</div><div style="font-size:1.4rem;font-weight:800;color:var(--tx);letter-spacing:-.03em">Entrega concluída!</div><p style="font-size:.84rem;color:var(--tx2);margin-top:.4rem">Como foi o serviço?</p><div class="stars-row"><button class="star-btn" onclick="setStar(1)">★</button><button class="star-btn" onclick="setStar(2)">★</button><button class="star-btn" onclick="setStar(3)">★</button><button class="star-btn" onclick="setStar(4)">★</button><button class="star-btn" onclick="setStar(5)">★</button></div><button class="btn-main" onclick="doRating()">Avaliar e fechar</button></div></div></div><div id="ui-c" style="display:none;height:100%;flex-direction:column;overflow:hidden;"><div id="c-map" style="display:flex;flex-direction:column;height:100%;overflow:hidden;"><div style="flex:1;position:relative;min-height:0;"><div class="mapbg" style="height:100%"><div class="mgrid"></div><div class="mroad" style="top:38%;left:0;right:0;height:10px"></div><div class="mroad" style="top:63%;left:0;right:0;height:7px"></div><div class="mroad" style="left:28%;top:0;bottom:0;width:9px"></div><div class="mroad" style="left:63%;top:0;bottom:0;width:7px"></div><div class="mblock" style="top:8%;left:4%;width:20%;height:25%"></div><div class="mblock" style="top:8%;left:34%;width:24%;height:22%"></div><div class="mblock" style="top:8%;right:4%;width:22%;height:23%"></div><div class="mblock" style="top:50%;left:4%;width:20%;height:22%"></div><div class="mblock" style="top:50%;left:34%;width:24%;height:20%"></div><div class="mblock" style="top:50%;right:4%;width:22%;height:23%"></div><div class="mlbl" style="top:3%;left:6%">Alfama</div><div class="mlbl" style="top:3%;left:40%">Baixa</div><div class="mlbl" style="top:3%;right:5%">Belém</div><div class="pin-u" style="left:30%;top:42%"><div class="pin-u-r"></div><div class="pin-u-d"></div></div><div class="mveh" id="cv1" style="left:46%;top:29%">🚛</div><div class="mveh" id="cv2" style="left:66%;top:55%">🚐</div><div class="mveh" id="cv3" style="left:20%;top:64%">🚜</div><div class="map-status-pill" id="c-mpill"><span style="width:6px;height:6px;background:var(--p);border-radius:50%;display:inline-block;"></span>3 operadores disponíveis</div></div></div><div class="sheet" id="c-ord-sh" style="position:relative;border-radius:20px 20px 0 0;"><div class="shandle"></div><div style="padding:.2rem 1rem .8rem;"><div style="display:flex;align-items:center;gap:.3rem;margin-bottom:.35rem;" id="step-dots"><div class="sdot on" id="sd1"></div><div class="sdot-line"></div><div class="sdot" id="sd2"></div><div class="sdot-line"></div><div class="sdot" id="sd3"></div><div class="sdot-line"></div><div class="sdot" id="sd4"></div><div class="sdot-line"></div><div class="sdot" id="sd5"></div><div class="sdot-line"></div><div class="sdot" id="sd6"></div></div><div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2);" id="step-label">Passo 1 de 6 — Moradas</div></div><div class="sscroll" id="wizard-scroll"><div class="wstep" id="ws1"><div class="wstep-q">📍 Para onde vai a carga?</div><div class="rinput-row"><div class="rdot o"></div><input class="rinput" id="c-orig" placeholder="Morada de recolha"></div><div class="rinput-row"><div class="rdot d"></div><input class="rinput" id="c-dest" placeholder="Morada de entrega"></div><div style="padding:.3rem 1rem 0;"><div style="font-size:.72rem;color:var(--tx2);margin-bottom:.4rem;">Distância aproximada (km)</div><div style="background:var(--bg2);border-radius:12px;padding:.65rem .9rem;display:flex;align-items:center;gap:.6rem;"><span>🛣️</span><input style="border:none;background:transparent;font-family:'Plus Jakarta Sans',sans-serif;font-size:1rem;font-weight:800;width:100%;outline:none;color:var(--tx);" type="number" id="c-dist" placeholder="Ex: 150 km"></div></div></div><div class="wstep" id="ws2" style="display:none;"><div class="wstep-q">🚛 Que tipo de veículo precisa?</div><div class="vgrid" id="c-vchips"></div></div><div class="wstep" id="ws3" style="display:none;"><div class="wstep-q">⚖️ Qual o peso aproximado da carga?</div><div class="opt-grid" id="ws3-opts"><div class="opt" onclick="selOpt(this,'peso','ate50','Até 50 kg')">Até 50 kg<div class="opt-sub">Caixas, sacos</div></div><div class="opt" onclick="selOpt(this,'peso','ate200','50–200 kg')">50–200 kg<div class="opt-sub">Eletrodomésticos</div></div><div class="opt" onclick="selOpt(this,'peso','ate500','200–500 kg')">200–500 kg<div class="opt-sub">Móveis, paletes</div></div><div class="opt" onclick="selOpt(this,'peso','ate1200','500–1.200 kg')">500–1.200 kg<div class="opt-sub">Pequena mudança</div></div><div class="opt" onclick="selOpt(this,'peso','ate3500','1.200–3.500 kg')">1.200–3.500 kg<div class="opt-sub">Mudança média</div></div><div class="opt" onclick="selOpt(this,'peso','mais3500','Acima 3.500 kg')">Acima 3.500 kg<div class="opt-sub">Carga pesada</div></div></div></div><div class="wstep" id="ws4" style="display:none;"><div class="wstep-q">📦 Que tipo de mercadoria?</div><div class="opt-grid" id="ws4-opts"><div class="opt" onclick="selOpt(this,'mercadoria','geral','Geral')">📦 Geral<div class="opt-sub">Caixas, volumes</div></div><div class="opt" onclick="selOpt(this,'mercadoria','moveis','Móveis')">🛋️ Móveis<div class="opt-sub">Sofás, camas, armários</div></div><div class="opt" onclick="selOpt(this,'mercadoria','construcao','Construção')">🏗️ Construção<div class="opt-sub">Materiais, madeira</div></div><div class="opt" onclick="selOpt(this,'mercadoria','alimentar','Alimentar')">🥗 Alimentar<div class="opt-sub">Frescos, refrigerados</div></div><div class="opt" onclick="selOpt(this,'mercadoria','maquinaria','Maquinaria')">⚙️ Maquinaria<div class="opt-sub">Equipamentos pesados</div></div><div class="opt" onclick="selOpt(this,'mercadoria','fragil','Frágil')">🏺 Frágil<div class="opt-sub">Arte, vidro, delicado</div></div></div></div><div class="wstep" id="ws5" style="display:none;"><div class="wstep-q">👷 Precisa de ajuda para carga/descarga?</div><div class="opt-list" id="ws5-opts"><div class="opt opt-row" onclick="selOpt(this,'ajuda','0','Não, só o transporte')"><div><div class="opt-title">Não, só o transporte</div><div class="opt-sub">O operador apenas conduz</div></div><div class="opt-price">Incluído</div></div><div class="opt opt-row" onclick="selOpt(this,'ajuda','20','+1 pessoa extra')"><div><div class="opt-title">+1 pessoa extra</div><div class="opt-sub">Ajuda na carga e descarga</div></div><div class="opt-price">+€20</div></div><div class="opt opt-row" onclick="selOpt(this,'ajuda','35','+2 pessoas extra')"><div><div class="opt-title">+2 pessoas extra</div><div class="opt-sub">Para cargas mais pesadas</div></div><div class="opt-price">+€35</div></div></div></div><div class="wstep" id="ws6" style="display:none;"><div class="wstep-q">🚜 Precisa de equipamento especial?</div><div class="opt-list" id="ws6-opts"><div class="opt opt-row" onclick="selOpt(this,'equip','0','Sem equipamento')"><div><div class="opt-title">Sem equipamento</div><div class="opt-sub">Transporte padrão</div></div><div class="opt-price">Incluído</div></div><div class="opt opt-row" onclick="selOpt(this,'equip','35','Plataforma elevatória')"><div><div class="opt-title">Plataforma elevatória</div><div class="opt-sub">Para cargas difíceis de aceder</div></div><div class="opt-price">+€35</div></div><div class="opt opt-row" onclick="selOpt(this,'equip','50','Empilhador')"><div><div class="opt-title">Empilhador</div><div class="opt-sub">Paletes e cargas industriais</div></div><div class="opt-price">+€50</div></div><div class="opt opt-row" onclick="selOpt(this,'equip','0','Grua (orçamento)');alert('A grua está sujeita a orçamento. O operador entrará em contacto.')"><div><div class="opt-title">Grua</div><div class="opt-sub">Levantamento de estruturas</div></div><div class="opt-price" style="color:var(--tx2)">Orçamento</div></div></div><div style="border-top:1px solid var(--bd);margin:0 0 .8rem;padding-top:.8rem;"><div class="wstep-q" style="padding:0;margin-bottom:.7rem;">⚡ Serviços adicionais</div><div class="opt-list"><div class="opt opt-row opt-check" id="opt-urgente" onclick="toggleExtra(this,'urgente')"><div><div class="opt-title">Serviço urgente</div><div class="opt-sub">Prioridade máxima de entrega</div></div><div style="display:flex;align-items:center;gap:.5rem;"><div class="opt-price">+20%</div><div class="opt-chkbox" id="chk-urgente"></div></div></div><div class="opt opt-row opt-check" id="opt-seguro" onclick="toggleExtra(this,'seguro')"><div><div class="opt-title">Seguro adicional</div><div class="opt-sub">Cobertura extra da mercadoria</div></div><div style="display:flex;align-items:center;gap:.5rem;"><div class="opt-price">+7,5%</div><div class="opt-chkbox" id="chk-seguro"></div></div></div></div></div></div><div class="wstep" id="ws-result" style="display:none;"><div class="wstep-q">✅ Resumo do pedido</div><div id="resumo-wrap" style="padding:0 1rem .8rem;"></div><div style="margin:0 1rem .5rem;background:var(--bg3);border:1.5px solid var(--pm);border-radius:16px;padding:1rem 1.1rem;"><div style="display:flex;justify-content:space-between;align-items:center;"><div><div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--pd)">Estimativa total</div><div style="font-size:.7rem;color:var(--tx2);margin-top:.1rem;">Cobrado após entrega confirmada</div></div><div style="font-size:1.8rem;font-weight:800;color:var(--pd);letter-spacing:-.04em;" id="c-pval">€ --</div></div><button id="c-detail-btn" onclick="toggleDetail()" style="background:none;border:none;color:var(--p);font-family:'Plus Jakarta Sans',sans-serif;font-size:.75rem;font-weight:700;cursor:pointer;padding:.4rem 0 0;display:flex;align-items:center;gap:.3rem;">Ver detalhe do cálculo ▾</button><div id="c-detail" style="display:none;margin-top:.65rem;border-top:1px solid var(--pm);padding-top:.65rem;"><div id="c-detail-rows"></div></div></div></div></div><div style="padding:.5rem 1rem .9rem;display:flex;gap:.6rem;" id="wizard-nav"><button id="btn-back" onclick="wizBack()" style="display:none;flex:1;padding:.85rem;border:1.5px solid var(--bd);border-radius:12px;background:#fff;color:var(--tx);font-family:'Plus Jakarta Sans',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;">← Voltar</button><button id="btn-next" onclick="wizNext()" class="btn-green" style="margin:0;flex:2;">Continuar →</button><button id="btn-search" onclick="searchOp()" class="btn-green" style="display:none;margin:0;flex:2;">🔍 Procurar operadores</button></div></div><div class="sheet" id="c-found-sh" style="display:none;position:relative;border-radius:20px 20px 0 0;"><div class="shandle"></div><div class="sscroll"><div style="padding:.3rem 1rem .5rem;display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2)">Operador encontrado</div><div style="font-size:.98rem;font-weight:800;color:var(--tx);letter-spacing:-.02em" id="c-rlbl">Lisboa → Porto</div></div><div style="text-align:right"><div style="font-size:1.4rem;font-weight:800;color:var(--p);letter-spacing:-.03em" id="c-fpr">€ --</div><div style="font-size:.62rem;color:var(--tx2)">Debitado após entrega</div></div></div><div style="height:1px;background:var(--bd);margin:.3rem 0"></div><div class="op-found"><div class="op-found-top"><div class="op-av">JM<div class="op-vbadge" id="c-opvbg">🚐</div></div><div class="op-info"><div class="op-name">José Mendes</div><div class="op-rating"><span class="op-rating-star">★</span>4.87 · 47 serviços</div><div class="op-vtext" id="c-opvtxt">🚐 Carrinha · XX-00-XX</div></div><div class="op-eta"><div class="op-eta-n">8</div><div class="op-eta-l">min</div></div></div><div class="vimg-card"><div class="vimg-ic" id="c-vim-ic">🚐</div><div class="vimg-info"><div class="vimg-mod" id="c-vim-mod">Renault Master</div><div class="vimg-pl">XX-00-XX</div><div class="vimg-cap" id="c-vim-cap">até 1.200 kg</div></div></div><div class="act-row"><button class="act-btn" onclick="cScr('c-chat')"><div class="act-btn-ic">💬</div><div class="act-btn-lb">Chat</div></button><button class="act-btn" onclick="alert('Em desenvolvimento')"><div class="act-btn-ic">📞</div><div class="act-btn-lb">Ligar</div></button><button class="act-btn" onclick="alert('Em desenvolvimento')"><div class="act-btn-ic">📤</div><div class="act-btn-lb">Partilhar</div></button></div></div><div style="height:1px;background:var(--bd)"></div><div class="trk-wrap"><div class="trk-row"><div class="trk-col"><div class="trk-c dn"></div><div class="trk-lv dn"></div></div><div class="trk-t dn">Pedido confirmado</div></div><div class="trk-row"><div class="trk-col"><div class="trk-c ac"></div><div class="trk-lv"></div></div><div class="trk-t ac">Operador a caminho da recolha</div></div><div class="trk-row"><div class="trk-col"><div class="trk-c wt"></div><div class="trk-lv"></div></div><div class="trk-t wt">Carga recolhida · em trânsito</div></div><div class="trk-row"><div class="trk-col"><div class="trk-c wt"></div></div><div class="trk-t wt">Entrega concluída</div></div></div></div><button class="btn-outline" onclick="confirmEntrega()">✅ Confirmar entrega recebida</button></div></div><div id="c-chat" class="scrflex"><div class="chat-top"><button class="chat-back" onclick="cScr('c-map')">←</button><div style="width:34px;height:34px;border-radius:50%;background:var(--pl);color:var(--pd);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.82rem;">JM</div><div><div style="font-weight:700;font-size:.88rem">José Mendes</div><div style="font-size:.66rem;color:var(--p)">● Online · 8 min</div></div></div><div class="chat-msgs" id="c-msgs"><div class="msg mi">Olá! Já estou a caminho. Chego em ~8 minutos 🚛<div class="mtime">14:23</div></div><div class="msg mo">Ótimo! Porta verde, 1.º andar.<div class="mtime">14:24</div></div><div class="msg mi">Perfeito! 👍<div class="mtime">14:24</div></div></div><div class="chat-bar"><input class="chat-fld" id="c-chat-inp" placeholder="Escreve uma mensagem..." onkeydown="if(event.key==='Enter')sendMsgC()"><button class="chat-send" onclick="sendMsgC()">➤</button></div></div><div id="c-hist" class="scrblock"><div class="sec-hdr">Os meus pedidos</div><div style="background:#fff"><div class="hitem"><div class="hitem-ic">🚐</div><div class="hitem-inf"><div class="hitem-rt">Lisboa → Coimbra</div><div class="hitem-mt">14 Mar · Carrinha · 200km · ★★★★★</div></div><div class="hitem-r"><div class="hitem-pr">€34,80</div><div class="hbadge hbd">Entregue</div></div></div><div class="hitem"><div class="hitem-ic">🚛</div><div class="hitem-inf"><div class="hitem-rt">Porto → Lisboa</div><div class="hitem-mt">10 Mar · Camião · 310km · ★★★★☆</div></div><div class="hitem-r"><div class="hitem-pr">€79,20</div><div class="hbadge hbd">Entregue</div></div></div><div class="hitem"><div class="hitem-ic">🚜</div><div class="hitem-inf"><div class="hitem-rt">Lisboa → Setúbal</div><div class="hitem-mt">Hoje · Reboque · 50km</div></div><div class="hitem-r"><div class="hitem-pr">€12,40</div><div class="hbadge hbp">Em curso</div></div></div></div></div><div id="c-prof" class="scrblock"><div class="prof-hd"><div class="prof-av" id="c-av">U</div><div><div class="prof-nm" id="c-pnm">Utilizador</div><div class="prof-em" id="c-pem"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c8ada5a9a1a488ada5a9a1a4e6aba7a5">[email&#160;protected]</a></div><div class="prof-badge">👤 Cliente</div></div></div><div class="prof-menu"><div class="prof-row" onclick="alert('Em desenvolvimento')"><div class="prof-ic">💳</div><div class="prof-tx"><div class="prof-title">Método de pagamento</div><div class="prof-sub">Cartão de débito/crédito</div></div><span class="prof-arr">›</span></div><div class="prof-row" onclick="alert('Em desenvolvimento')"><div class="prof-ic">🧾</div><div class="prof-tx"><div class="prof-title">Dados de faturação</div><div class="prof-sub">NIF e morada para faturas</div></div><span class="prof-arr">›</span></div><div class="prof-row" onclick="alert('Regista uma nova conta como operador.')"><div class="prof-ic">🚛</div><div class="prof-tx"><div class="prof-title">Tornar-me operador</div><div class="prof-sub">Começa a ganhar com o teu veículo</div></div><span class="prof-arr">›</span></div><div class="prof-row" onclick="doLogout()"><div class="prof-ic" style="background:#FEF2F2">🚪</div><div class="prof-tx"><div class="prof-title" style="color:var(--rd)">Terminar sessão</div></div></div></div></div><div class="bnav"><button class="nbtn on" id="c-btn-hm" onclick="cScr('c-map',this)"><span class="nbtn-ic">🏠</span><span class="nbtn-lb">Início</span></button><div class="ncta-wrap"><button class="ncta-btn" onclick="cScr('c-map',null)"><span class="nbtn-ic">📦</span><span class="nbtn-lb">Pedir</span></button></div><button class="nbtn" onclick="cScr('c-hist',this)"><span class="nbtn-ic">📋</span><span class="nbtn-lb">Histórico</span></button><button class="nbtn" onclick="cScr('c-prof',this)"><span class="nbtn-ic">👤</span><span class="nbtn-lb">Perfil</span></button></div></div><div id="ui-o" style="display:none;height:100%;flex-direction:column;overflow:hidden;"><div id="o-home" style="display:flex;flex-direction:column;height:100%;overflow:hidden;"><div class="op-toggle"><div><div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2);margin-bottom:.1rem">Estado</div><div class="op-status on" id="o-st">● Disponível para serviços</div></div><label class="sw"><input type="checkbox" id="o-tog" checked onchange="toggleOp(this.checked)"><span class="swsl"></span></label></div><div style="flex:1;position:relative;min-height:0;"><div id="gmap-o" style="width:100%;height:100%;"></div><div id="omap-fallback" class="mapbg" style="height:100%"><div class="mgrid"></div><div class="mroad" style="top:45%;left:0;right:0;height:9px"></div><div class="mroad" style="left:32%;top:0;bottom:0;width:8px"></div><div class="mblock" style="top:8%;left:4%;width:24%;height:30%"></div><div class="mblock" style="top:8%;left:38%;width:24%;height:28%"></div><div class="mblock" style="top:8%;right:4%;width:22%;height:30%"></div><div class="mblock" style="top:56%;left:4%;width:24%;height:30%"></div><div class="mblock" style="top:56%;left:38%;width:24%;height:30%"></div><div class="mblock" style="top:56%;right:4%;width:22%;height:30%"></div><div class="pin-u" style="left:40%;top:47%"><div class="pin-u-r"></div><div class="pin-u-d"></div></div></div><div class="map-status-pill" id="o-mpill" style="z-index:20">📍 A localizar...</div><button id="o-nav-btn" onclick="startNavigation()" style="display:none;position:absolute;bottom:1rem;right:1rem;z-index:20;" class="btn-nav">🧭 Iniciar navegação</button><div class="route-info-bar hidden" id="o-route-bar"><div class="ri-item"><div class="ri-val g" id="o-ri-dist">--</div><div class="ri-lbl">Distância</div></div><div class="ri-sep"></div><div class="ri-item"><div class="ri-val" id="o-ri-time">--</div><div class="ri-lbl">Tempo est.</div></div><div class="ri-sep"></div><div class="ri-item"><div class="ri-val g" id="o-ri-earn">€--</div><div class="ri-lbl">Ganhas</div></div></div></div><div style="background:var(--bg2);overflow-y:auto;max-height:55%;"><div class="sec-hdr">Pedidos disponíveis</div><div id="o-ord-lst"><div class="order-card"><div class="oc-hd"><div><div class="oc-tag">🆕 Novo pedido</div><div style="font-size:.68rem;color:rgba(255,255,255,.65);margin-top:.05rem">Lisboa → Porto · 200km</div></div><div style="text-align:right"><div class="oc-pr">€34,80 <small>tu recebes</small></div></div></div><div class="oc-bd"><div class="oc-rt">Rua Augusta, Lisboa → Av. Aliados, Porto</div><div class="oc-meta"><div class="meta-i"><div class="meta-lb">Distância</div><div class="meta-vl">200 km</div></div><div class="meta-i"><div class="meta-lb">Duração</div><div class="meta-vl">~2h 10min</div></div><div class="meta-i"><div class="meta-lb">Carga</div><div class="meta-vl">📦 Caixas · 150kg</div></div><div class="meta-i"><div class="meta-lb">Veículo</div><div class="meta-vl">🚐 Carrinha</div></div></div><div style="background:var(--bg3);border-radius:9px;padding:.5rem .7rem;margin-bottom:.65rem;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:.72rem;color:var(--tx2)">Total pago pelo cliente</span><span style="font-size:.8rem;font-weight:700;color:var(--tx)">€45,20 → tu recebes €34,80</span></div><div class="tbar"><div class="tbar-fill"></div></div><div class="oc-btns"><button class="btn-dec" onclick="recPed()">✕ Recusar</button><button class="btn-acc" onclick="accPed()">✓ Aceitar serviço</button></div></div></div></div><div id="o-empty" style="display:none" class="empty"><div class="empty-ic">🔍</div><div class="empty-ti">À espera de pedidos</div><div class="empty-su">Mantém-te disponível e receberás pedidos na tua zona.</div></div></div></div><div id="o-curso" class="scrflex"><div style="flex:0 0 32%;position:relative;min-height:0;"><div class="mapbg" style="height:100%"><div class="mgrid"></div><div class="mroad" style="top:50%;left:0;right:0;height:9px"></div><div class="mroad" style="left:35%;top:0;bottom:0;width:8px"></div><div class="pin-u" style="left:36%;top:52%"><div class="pin-u-r"></div><div class="pin-u-d"></div></div><div class="pin-d" style="right:18%;top:38%"><div class="pin-d-b"><div class="pin-d-dot"></div></div></div><div class="mveh" style="left:52%;top:46%;animation:none">🚐</div></div></div><div style="flex:1;overflow-y:auto;background:#fff;"><div style="padding:.8rem 1rem;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;"><div><div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2)">Serviço em curso</div><div style="font-size:1.05rem;font-weight:800;color:var(--tx);letter-spacing:-.02em">Lisboa → Porto · €34,80</div></div><div style="background:var(--bg3);border-radius:10px;padding:.4rem .7rem;text-align:right"><div style="font-size:1.25rem;font-weight:800;color:var(--p);letter-spacing:-.03em">~2h</div><div style="font-size:.58rem;color:var(--tx2)">restante</div></div></div><div style="padding:.8rem 1rem;border-bottom:1px solid var(--bd);"><div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2);margin-bottom:.55rem">Cliente</div><div style="display:flex;align-items:center;gap:.75rem;"><div style="width:42px;height:42px;border-radius:50%;background:var(--pl);color:var(--pd);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.9rem;">AR</div><div style="flex:1"><div style="font-weight:700">Ana Rodrigues</div><div style="font-size:.72rem;color:var(--tx2)">★ 4.9 como cliente</div></div><button onclick="oScr('o-chat')" style="background:var(--pl);border:none;border-radius:9px;padding:.45rem .75rem;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.8rem;color:var(--pd);">💬 Chat</button></div></div><div class="trk-wrap"><div class="trk-row"><div class="trk-col"><div class="trk-c dn"></div><div class="trk-lv dn"></div></div><div class="trk-t dn">Pedido aceite</div></div><div class="trk-row"><div class="trk-col"><div class="trk-c ac"></div><div class="trk-lv"></div></div><div class="trk-t ac">A caminho da recolha · Rua Augusta</div></div><div class="trk-row"><div class="trk-col"><div class="trk-c wt"></div><div class="trk-lv"></div></div><div class="trk-t wt">Carga recolhida · em trânsito</div></div><div class="trk-row"><div class="trk-col"><div class="trk-c wt"></div></div><div class="trk-t wt">Entrega concluída · Av. Aliados</div></div></div><button class="btn-green" onclick="doneServico()">✅ Marcar como entregue</button></div></div><div id="o-chat" class="scrflex"><div class="chat-top"><button class="chat-back" onclick="oScr('o-curso')">←</button><div style="width:34px;height:34px;border-radius:50%;background:var(--pl);color:var(--pd);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem;">AR</div><div><div style="font-weight:700;font-size:.88rem">Ana Rodrigues</div><div style="font-size:.66rem;color:var(--p)">● Cliente</div></div></div><div class="chat-msgs" id="o-msgs"><div class="msg mi">Bom dia! Quando chega?<div class="mtime">09:15</div></div><div class="msg mo">Estou a 10 min da morada 🚛<div class="mtime">09:16</div></div></div><div class="chat-bar"><input class="chat-fld" id="o-chat-inp" placeholder="Escreve uma mensagem..." onkeydown="if(event.key==='Enter')sendMsgO()"><button class="chat-send" onclick="sendMsgO()">➤</button></div></div><div id="o-earn" class="scrblock"><div class="earn-hd"><div class="earn-lbl">Ganhos este mês</div><div class="earn-amt">€ 2.847</div><div class="earn-tier">⭐ Silver · 80% · 4.87 ★</div></div><div class="earn-grid"><div class="earn-card"><div class="earn-val g">47</div><div class="earn-clbl">Serviços</div></div><div class="earn-card"><div class="earn-val g">€655</div><div class="earn-clbl">Comissão</div></div><div class="earn-card"><div class="earn-val">3.214 km</div><div class="earn-clbl">Percorridos</div></div><div class="earn-card"><div class="earn-val g">4.87 ★</div><div class="earn-clbl">Avaliação</div></div></div><button class="btn-cashout" onclick="alert('💸 Levantamento solicitado!\n\nTransferência SEPA em 1-2 dias úteis.')">💸 Levantar para IBAN</button><div class="sec-hdr">Últimos serviços</div><div style="background:#fff"><div class="hitem"><div class="hitem-ic">🚐</div><div class="hitem-inf"><div class="hitem-rt">Lisboa → Coimbra</div><div class="hitem-mt">Hoje · 200km · ★★★★★</div></div><div class="hitem-r"><div class="hitem-pr">€34,80</div><div class="hbadge hbd">Pago</div></div></div><div class="hitem"><div class="hitem-ic">🚛</div><div class="hitem-inf"><div class="hitem-rt">Porto → Braga</div><div class="hitem-mt">Ontem · 60km · ★★★★☆</div></div><div class="hitem-r"><div class="hitem-pr">€12,40</div><div class="hbadge hbd">Pago</div></div></div></div></div><div id="o-prof" class="scrblock"><div class="prof-hd"><div class="prof-av" id="o-av">U</div><div><div class="prof-nm" id="o-pnm">Operador</div><div class="prof-em" id="o-pem"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="6a0f070b03062a0f070b030644090507">[email&#160;protected]</a></div><div class="prof-badge">🚛 Operador · ⭐ Silver 80%</div></div></div><div class="prof-menu"><div class="prof-row" onclick="alert('Em desenvolvimento')"><div class="prof-ic">🏦</div><div class="prof-tx"><div class="prof-title">IBAN de pagamento</div><div class="prof-sub">PT50 **** **** ***** 00</div></div><span class="prof-arr">›</span></div><div class="prof-row" onclick="alert('Em desenvolvimento')"><div class="prof-ic">🚐</div><div class="prof-tx"><div class="prof-title">O meu veículo</div><div class="prof-sub">Carrinha · XX-00-XX</div></div><span class="prof-arr">›</span></div><div class="prof-row" onclick="alert('Em desenvolvimento')"><div class="prof-ic">🛡️</div><div class="prof-tx"><div class="prof-title">Seguro</div><div class="prof-sub">Adicionar apólice de seguro</div></div><span class="prof-arr">›</span></div><div class="prof-row" onclick="alert('Em desenvolvimento')"><div class="prof-ic">📊</div><div class="prof-tx"><div class="prof-title">Relatório fiscal</div><div class="prof-sub">Exportar para IRS</div></div><span class="prof-arr">›</span></div><div class="prof-row" onclick="doLogout()"><div class="prof-ic" style="background:#FEF2F2">🚪</div><div class="prof-tx"><div class="prof-title" style="color:var(--rd)">Terminar sessão</div></div></div></div></div><div class="bnav"><button class="nbtn on" id="o-btn-hm" onclick="oScr('o-home',this)"><span class="nbtn-ic">🔍</span><span class="nbtn-lb">Pedidos</span></button><button class="nbtn" onclick="oScr('o-curso',this)"><span class="nbtn-ic">🚛</span><span class="nbtn-lb">Em curso</span></button><button class="nbtn" onclick="oScr('o-earn',this)"><span class="nbtn-ic">💰</span><span class="nbtn-lb">Ganhos</span></button><button class="nbtn" onclick="oScr('o-prof',this)"><span class="nbtn-ic">👤</span><span class="nbtn-lb">Perfil</span></button></div></div></div><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+const BACKEND='https://cargolink-backend-production.up.railway.app';
+let U=null,aMode='login',selV=null,curStar=0;
+const VS=[
+{id:'reboque',  icon:'🚜',name:'Reboque',              base:25,  rate:.60, cap:'até 750 kg',    maxkg:750,   model:'Reboque / Atrelado',           desc:'Ideal para pequenas cargas e entregas curtas.'},
+{id:'carrinha', icon:'🚐',name:'Carrinha',              base:35,  rate:.75, cap:'até 1.200 kg',  maxkg:1200,  model:'Renault Master / Ford Transit', desc:'O serviço mais comum. Móveis, caixas e eletrodomésticos.'},
+{id:'camiao-p', icon:'🚛',name:'Camião Pequeno (3.5T)', base:60,  rate:1.00,cap:'até 3.500 kg',  maxkg:3500,  model:'Mercedes Sprinter / Iveco Daily',desc:'Para mudanças pequenas e paletes.'},
+{id:'camiao-g', icon:'🏗️',name:'Camião Grande',         base:100, rate:1.40,cap:'acima 3.500 kg',maxkg:99999, model:'MAN TGX / Volvo FH',            desc:'Transporte pesado e grandes volumes.'},
+{id:'frig-p',   icon:'❄️',name:'Frigorífica Pequena',   base:45,  rate:.95, cap:'até 1.000 kg',  maxkg:1000,  model:'Van Frigorífica Pequena',       desc:'Para alimentos ou produtos sensíveis ao frio.'},
+{id:'frig-g',   icon:'🧊',name:'Frigorífica Grande',    base:75,  rate:1.25,cap:'até 2.500 kg',  maxkg:2500,  model:'Camião Frigorífico Grande',     desc:'Transporte refrigerado de maior volume.'}
+];
+function hideSplash(){
+const sp=document.getElementById('splash');
+if(!sp) return;
+sp.classList.add('hide');
+setTimeout(()=>{try{sp.remove();}catch(e){}},500);
+const s=localStorage.getItem('cl_u');
+if(s){try{boot(JSON.parse(s));}catch(e){localStorage.removeItem('cl_u');}}
+}
+setTimeout(hideSplash, 1400);
+function swTab(m){
+aMode=m;
+document.getElementById('av-login').style.display=m==='login'?'block':'none';
+document.getElementById('av-reg').style.display=m==='reg'?'block':'none';
+document.getElementById('tab-login').classList.toggle('on',m==='login');
+document.getElementById('tab-reg').classList.toggle('on',m==='reg');
+document.getElementById('a-btn').textContent=m==='login'?'Entrar →':'Criar conta →';
+}
+function openFgt(){document.getElementById('fgt').classList.add('show');}
+function closeFgt(){document.getElementById('fgt').classList.remove('show');}
+async function sendFgt(){
+const em=document.getElementById('fgt-em').value.trim();
+if(!em)return;
+try{await fetch(BACKEND+'/auth/recuperar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em})});}catch(e){}
+document.getElementById('fgt-ok').style.display='block';
+}
+async function doAuth(){
+if(aMode==='login') await doLogin(); else await doReg();
+}
+async function doLogin(){
+const em=document.getElementById('l-em').value.trim();
+const pw=document.getElementById('l-pw').value;
+const err=document.getElementById('l-err');err.style.display='none';
+if(!em||!pw){err.style.display='block';err.textContent='Preenche email e password.';return;}
+const btn=document.getElementById('a-btn');btn.textContent='A entrar...';btn.disabled=true;
+try{
+const r=await fetch(BACKEND+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em,password:pw})});
+const d=await r.json();
+if(d.sucesso){const tp=d.token.split('.');const td=JSON.parse(atob(tp[1]));boot({id:td.sub,email:em,nome:td.user_metadata?.nome||em.split('@')[0],tipo:td.user_metadata?.tipo||'cliente',token:d.token});}
+else{err.style.display='block';err.textContent='Email ou password incorretos.';}
+}catch(e){boot({id:'demo',email:em,nome:em.split('@')[0],tipo:'cliente',token:'demo'});}
+btn.textContent='Entrar →';btn.disabled=false;
+}
+async function doReg(){
+const nm=document.getElementById('r-nm').value.trim(),em=document.getElementById('r-em').value.trim(),pw=document.getElementById('r-pw').value,tp=document.getElementById('r-tp').value;
+const err=document.getElementById('r-err');err.style.display='none';
+if(!nm||!em||!pw){err.style.display='block';err.textContent='Preenche todos os campos.';return;}
+if(pw.length<8){err.style.display='block';err.textContent='Password mínimo 8 caracteres.';return;}
+const btn=document.getElementById('a-btn');btn.textContent='A criar...';btn.disabled=true;
+try{
+const r=await fetch(BACKEND+'/auth/registar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome:nm,email:em,password:pw,tipo:tp})});
+const d=await r.json();
+if(d.sucesso) boot({id:d.utilizador.id,email:em,nome:nm,tipo:tp,token:'new'});
+else{err.style.display='block';err.textContent=d.erro||'Erro no registo.';}
+}catch(e){boot({id:'demo',email:em,nome:nm,tipo:tp,token:'demo'});}
+btn.textContent='Criar conta →';btn.disabled=false;
+}
+function boot(u){
+U=u;localStorage.setItem('cl_u',JSON.stringify(u));
+document.getElementById('auth').classList.add('gone');
+document.getElementById('app').classList.add('show');
+document.getElementById('tb-nome').textContent=u.nome.split(' ')[0];
+document.getElementById('tb-tipo').textContent=u.tipo==='operador'?'🚛 Operador':'👤 Cliente';
+if(u.tipo==='operador') initO(u); else initC(u);
+}
+function initC(u){
+document.getElementById('ui-c').style.display='flex';
+document.getElementById('c-av').textContent=u.nome.charAt(0).toUpperCase();
+document.getElementById('c-pnm').textContent=u.nome;
+document.getElementById('c-pem').textContent=u.email;
+const cc=document.getElementById('c-vchips');
+VS.forEach((v,i)=>{
+const d=document.createElement('div');
+d.className='vcard'+(i===0?' on':'');
+d.innerHTML=`<div class="vcard-ic">${v.icon}</div><div class="vcard-info"><div class="vcard-name">${v.name}</div><div class="vcard-cap">${v.cap}</div><div class="vcard-desc">${v.desc}</div></div><div class="vcard-chk">✓</div>`;
+d.onclick=()=>{document.querySelectorAll('.vcard').forEach(c=>c.classList.remove('on'));d.classList.add('on');selV=v;calcPr();};
+cc.appendChild(d);
+});
+selV=null;
+wizStep(1);
+animV();
+}
+function cScr(id,btn){
+['c-map','c-chat','c-hist','c-prof'].forEach(s=>{
+const el=document.getElementById(s);if(!el)return;
+if(s==='c-map'){el.style.display='none';}
+else if(s==='c-chat'){el.classList.remove('on');el.style.display='none';}
+else{el.classList.remove('on');}
+});
+const el=document.getElementById(id);
+if(id==='c-map'){el.style.display='flex';}
+else if(id==='c-chat'){el.style.display='flex';el.classList.add('on');}
+else{el.classList.add('on');}
+if(btn){document.querySelectorAll('#ui-c .nbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
+}
+function showPR(){}
+let wStep=1, wData={ajuda:0,equip:0,urgente:false,seguro:false,peso:'',mercadoria:'',veiculo:null};
+const wTotal=6;
+function wizStep(n){
+for(let i=1;i<=wTotal;i++){
+const el=document.getElementById('ws'+i);
+if(el) el.style.display=i===n?'block':'none';
+}
+const res=document.getElementById('ws-result');
+if(res) res.style.display='none';
+for(let i=1;i<=wTotal;i++){
+const d=document.getElementById('sd'+i);
+const l=document.getElementById('sdl'+(i));
+if(!d) continue;
+d.className='sdot'+(i===n?' on':i<n?' done':'');
+}
+document.querySelectorAll('.sdot-line').forEach((l,i)=>{l.className='sdot-line'+(i<n-1?' done':'');});
+const labels=['Moradas','Veículo','Peso da carga','Tipo de mercadoria','Ajuda extra','Equipamento'];
+document.getElementById('step-label').textContent='Passo '+n+' de '+wTotal+' — '+labels[n-1];
+document.getElementById('btn-back').style.display=n>1?'block':'none';
+document.getElementById('btn-next').style.display='block';
+document.getElementById('btn-search').style.display='none';
+document.getElementById('wizard-scroll').scrollTop=0;
+wStep=n;
+}
+function wizNext(){
+if(wStep===1){
+const o=document.getElementById('c-orig').value.trim();
+const d=document.getElementById('c-dest').value.trim();
+const km=parseFloat(document.getElementById('c-dist').value)||0;
+if(!o||!d){alert('Indica a morada de recolha e entrega.');return;}
+if(km<=0){alert('Indica a distância aproximada em km.');return;}
+wizStep(2);
+} else if(wStep===2){
+if(!selV){alert('Seleciona um tipo de veículo.');return;}
+wData.veiculo=selV;
+wizStep(3);
+} else if(wStep===3){
+if(!wData.peso){alert('Seleciona o peso aproximado da carga.');return;}
+wizStep(4);
+} else if(wStep===4){
+if(!wData.mercadoria){alert('Seleciona o tipo de mercadoria.');return;}
+wizStep(5);
+} else if(wStep===5){
+wizStep(6);
+} else if(wStep===6){
+showResult();
+}
+}
+function wizBack(){
+if(wStep>1) wizStep(wStep-1);
+}
+function selOpt(el,key,val,label){
+el.closest('.opt-grid,.opt-list').querySelectorAll('.opt').forEach(o=>o.classList.remove('on'));
+el.classList.add('on');
+wData[key]=isNaN(parseInt(val))?val:parseInt(val);
+wData[key+'_label']=label;
+}
+function toggleExtra(el,key){
+el.classList.toggle('on');
+wData[key]=el.classList.contains('on');
+document.getElementById('chk-'+key).textContent=wData[key]?'✓':'';
+}
+function showResult(){
+for(let i=1;i<=wTotal;i++){const e=document.getElementById('ws'+i);if(e)e.style.display='none';}
+document.getElementById('ws-result').style.display='block';
+for(let i=1;i<=wTotal;i++){const d=document.getElementById('sd'+i);if(d)d.className='sdot done';}
+document.querySelectorAll('.sdot-line').forEach(l=>l.className='sdot-line done');
+document.getElementById('step-label').textContent='Resumo do pedido';
+document.getElementById('btn-back').style.display='block';
+document.getElementById('btn-next').style.display='none';
+document.getElementById('btn-search').style.display='block';
+const v=wData.veiculo||selV||VS[0];
+const km=parseFloat(document.getElementById('c-dist').value)||0;
+const ajuda=wData.ajuda||0;
+const equip=wData.equip||0;
+const urgente=wData.urgente;
+const seguro=wData.seguro;
+const base=v.base;
+const kmCost=km*v.rate;
+let subtotal=base+kmCost+ajuda+equip;
+let urg=0,seg=0;
+if(urgente){urg=subtotal*0.20;subtotal+=urg;}
+if(seguro){seg=subtotal*0.075;subtotal+=seg;}
+const total=subtotal;
+document.getElementById('c-pval').textContent='€ '+total.toFixed(2).replace('.',',');
+wData.lastTotal=total;
+let det=`<div class="pdetail-row"><span>Serviço de transporte</span><span>€ ${(base+kmCost).toFixed(2).replace('.',',')}</span></div>`;
+if(ajuda>0) det+=`<div class="pdetail-row"><span>👷 Ajuda extra</span><span>+€ ${ajuda.toFixed(2)}</span></div>`;
+if(equip>0) det+=`<div class="pdetail-row"><span>🚜 Equipamento</span><span>+€ ${equip.toFixed(2)}</span></div>`;
+if(urgente) det+=`<div class="pdetail-row"><span>⚡ Serviço urgente</span><span>+€ ${urg.toFixed(2).replace('.',',')}</span></div>`;
+if(seguro) det+=`<div class="pdetail-row"><span>📦 Seguro adicional</span><span>+€ ${seg.toFixed(2).replace('.',',')}</span></div>`;
+det+=`<div class="pdetail-total"><span>Total estimado</span><span>€ ${total.toFixed(2).replace('.',',')}</span></div>`;
+document.getElementById('c-detail-rows').innerHTML=det;
+const orig=document.getElementById('c-orig').value.split(',')[0];
+const dest=document.getElementById('c-dest').value.split(',')[0];
+document.getElementById('resumo-wrap').innerHTML=`
+<div class="resumo-item"><div class="resumo-ic">📍</div><div><div class="resumo-lbl">Percurso</div><div class="resumo-val">${orig} → ${dest} · ${km} km</div></div></div><div class="resumo-item"><div class="resumo-ic">${v.icon}</div><div><div class="resumo-lbl">Veículo</div><div class="resumo-val">${v.name} · ${v.cap}</div></div></div><div class="resumo-item"><div class="resumo-ic">⚖️</div><div><div class="resumo-lbl">Peso</div><div class="resumo-val">${wData.peso_label||'—'}</div></div></div><div class="resumo-item"><div class="resumo-ic">📦</div><div><div class="resumo-lbl">Mercadoria</div><div class="resumo-val">${wData.mercadoria_label||'—'}</div></div></div>
+${ajuda>0?`<div class="resumo-item"><div class="resumo-ic">👷</div><div><div class="resumo-lbl">Ajuda extra</div><div class="resumo-val">${wData.ajuda_label}</div></div></div>`:''}
+${equip>0?`<div class="resumo-item"><div class="resumo-ic">🚜</div><div><div class="resumo-lbl">Equipamento</div><div class="resumo-val">${wData.equip_label}</div></div></div>`:''}
+${urgente?`<div class="resumo-item"><div class="resumo-ic">⚡</div><div><div class="resumo-lbl">Urgente</div><div class="resumo-val">Sim (+20%)</div></div></div>`:''}
+${seguro?`<div class="resumo-item"><div class="resumo-ic">📦</div><div><div class="resumo-lbl">Seguro</div><div class="resumo-val">Sim (+7,5%)</div></div></div>`:''}
+`;
+}
+function toggleDetail(){
+const d=document.getElementById('c-detail');
+const btn=document.getElementById('c-detail-btn');
+const open=d.style.display==='block';
+d.style.display=open?'none':'block';
+btn.textContent=open?'Ver detalhe do cálculo ▾':'Ocultar detalhe ▴';
+}
+function calcPr(){}
+async function searchOp(){
+const o=document.getElementById('c-orig').value,d2=document.getElementById('c-dest').value;
+if(!o||!d2){alert('Indica morada de recolha e entrega.');return;}
+const btn=document.getElementById('c-srch');btn.textContent='🔍 A procurar...';btn.disabled=true;
+await new Promise(r=>setTimeout(r,1800));
+const dist=parseFloat(document.getElementById('c-dist')?.value)||150;
+const v2=wData.veiculo||selV||VS[0];const pr=(wData.lastTotal||v2.base+dist*v2.rate).toFixed(2).replace('.',',');
+const v=selV||VS[0];
+document.getElementById('c-rlbl').textContent=o.split(',')[0]+' → '+d2.split(',')[0];
+document.getElementById('c-fpr').textContent='€ '+pr;
+document.getElementById('c-opvbg').textContent=v.icon;
+document.getElementById('c-opvtxt').textContent=v.icon+' '+v.name+' · XX-00-XX';
+document.getElementById('c-vim-ic').textContent=v.icon;
+document.getElementById('c-vim-mod').textContent=v.model;
+document.getElementById('c-vim-cap').textContent=v.cap;
+document.getElementById('c-ord-sh').style.display='none';
+document.getElementById('c-found-sh').style.display='block';
+document.getElementById('c-mpill').innerHTML='<span style="width:6px;height:6px;background:var(--p);border-radius:50%;display:inline-block;"></span> Operador a 8 min';
+btn.textContent='🔍 Procurar operadores';btn.disabled=false;
+}
+function confirmEntrega(){
+  // Show payment first, then rating
+  const priceEl=document.getElementById('c-fpr');
+  const total=priceEl?priceEl.textContent.replace('€','').replace(',','.').trim():'0';
+  abrirPagamento(total);
+}
+function aposConfirmacaoEntrega(){
+  closePayModal();
+  document.getElementById('rating-ov').classList.add('show');
+  stopPolling();
+}
+let pollingTimer=null;
+function startPollingPedido(pedidoId){
+if(pollingTimer) clearInterval(pollingTimer);
+pollingTimer=setInterval(async()=>{
+try{
+const r=await fetch(BACKEND+'/pedidos/cliente/'+U.id);
+const pedidos=await r.json();
+const p=pedidos.find(x=>x.id===pedidoId);
+if(p&&p.estado==='aceite'&&p.operador_id){
+clearInterval(pollingTimer);
+document.getElementById('c-mpill').innerHTML='<span style="width:6px;height:6px;background:var(--p);border-radius:50%;display:inline-block;"></span>✅ Operador a caminho!';
+startTrackingCliente(pedidoId);
+}
+}catch(e){}
+},5000); 
+}
+function stopPolling(){if(pollingTimer) clearInterval(pollingTimer); pollingTimer=null;}
+let trackingClientTimer=null;
+function startTrackingCliente(pedidoId){
+if(trackingClientTimer) clearInterval(trackingClientTimer);
+trackingClientTimer=setInterval(async()=>{
+try{
+const r=await fetch(BACKEND+'/tracking/'+pedidoId);
+const d=await r.json();
+if(d.operador_lat&&d.operador_lng&&gMapC){
+const lnglat=[parseFloat(d.operador_lng),parseFloat(d.operador_lat)];
+if(!operatorMarker){
+const el=document.createElement('div');
+el.innerHTML='🚛';
+el.style.cssText='font-size:1.5rem;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3));';
+operatorMarker=new mapboxgl.Marker({element:el}).setLngLat(lnglat).addTo(gMapC);
+} else { operatorMarker.setLngLat(lnglat); }
+gMapC.easeTo({center:lnglat,duration:1000});
+}
+}catch(e){}
+},5000);
+}
+function setStar(n){curStar=n;document.querySelectorAll('.star-btn').forEach((s,i)=>s.classList.toggle('lit',i<n));}
+async function doRating(){
+if(curStar>0&&U?.pedido_ativo){
+try{
+await fetch(BACKEND+'/avaliacao/criar',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({
+pedido_id:U.pedido_ativo,
+cliente_id:U.id,
+estrelas:curStar
+})
+});
+}catch(e){}
+}
+document.getElementById('rating-ov').classList.remove('show');
+document.getElementById('c-found-sh').style.display='none';
+document.getElementById('c-ord-sh').style.display='block';
+document.getElementById('c-mpill').innerHTML='<span style="width:6px;height:6px;background:var(--p);border-radius:50%;display:inline-block;"></span>3 operadores disponíveis';
+document.getElementById('c-orig').value='';
+document.getElementById('c-dest').value='';
+if(document.getElementById('c-orig').dataset) delete document.getElementById('c-orig').dataset.coords;
+if(document.getElementById('c-dest').dataset) delete document.getElementById('c-dest').dataset.coords;
+document.getElementById('c-dist').value='';
+document.getElementById('c-dist-bar').style.display='none';
+document.getElementById('c-prow').style.display='none';
+U.pedido_ativo=null;
+curStar=0;
+alert('Obrigado pela avaliação! O pagamento será processado após confirmação.');
+}
+function sendMsgC(){const i=document.getElementById('c-chat-inp');const m=i.value.trim();if(!m)return;const ms=document.getElementById('c-msgs');const t=new Date().toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'});ms.innerHTML+=`<div class="msg mo">${m}<div class="mtime">${t}</div></div>`;i.value='';ms.scrollTop=ms.scrollHeight;setTimeout(()=>{ms.innerHTML+=`<div class="msg mi">Ok! 👍<div class="mtime">${t}</div></div>`;ms.scrollTop=ms.scrollHeight;},900);}
+function initO(u){
+document.getElementById('ui-o').style.display='flex';
+document.getElementById('o-av').textContent=u.nome.charAt(0).toUpperCase();
+document.getElementById('o-pnm').textContent=u.nome;
+document.getElementById('o-pem').textContent=u.email;
+loadPendingOrders();
+setInterval(loadPendingOrders,10000);
+}
+async function loadPendingOrders(){
+try{
+const r=await fetch(BACKEND+'/pedidos/pendentes');
+const pedidos=await r.json();
+if(!Array.isArray(pedidos)||!pedidos.length) return;
+const lista=document.getElementById('o-ord-lst');
+lista.style.display='block';
+document.getElementById('o-empty').style.display='none';
+lista.innerHTML='';
+pedidos.forEach(p=>{
+const dist=p.distancia_km||'--';
+const dur=p.duracao_min?(p.duracao_min>=60?`${Math.floor(p.duracao_min/60)}h ${p.duracao_min%60}min`:`${p.duracao_min} min`):'--';
+const earn=(parseFloat(p.preco_total||0)*0.80).toFixed(2);
+const card=document.createElement('div');
+card.className='order-card';
+card.innerHTML=`
+<div class="oc-hd"><div><div class="oc-tag">🆕 Novo pedido</div><div style="font-size:.68rem;color:rgba(255,255,255,.65);margin-top:.05rem">${p.origem?.split(',')[0]||'--'} → ${p.destino?.split(',')[0]||'--'} · ${dist} km</div></div><div style="text-align:right"><div class="oc-pr">€${earn} <small>tu recebes</small></div></div></div><div class="oc-bd"><div class="oc-rt">${p.origem?.split(',')[0]||'--'} → ${p.destino?.split(',')[0]||'--'}</div><div class="oc-meta"><div class="meta-i"><div class="meta-lb">Distância</div><div class="meta-vl">${dist} km</div></div><div class="meta-i"><div class="meta-lb">Duração</div><div class="meta-vl">${dur}</div></div><div class="meta-i"><div class="meta-lb">Veículo</div><div class="meta-vl">${p.tipo_veiculo||'--'}</div></div><div class="meta-i"><div class="meta-lb">Valor cliente</div><div class="meta-vl">€${p.preco_total||'--'}</div></div></div><div style="background:var(--bg3);border-radius:9px;padding:.5rem .7rem;margin-bottom:.65rem;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:.72rem;color:var(--tx2)">Total pago pelo cliente</span><span style="font-size:.8rem;font-weight:700;color:var(--tx)">€${p.preco_total||'--'} → tu recebes €${earn}</span></div><div class="tbar"><div class="tbar-fill"></div></div><div class="oc-btns"><button class="btn-dec" onclick="recPed()">✕ Recusar</button><button class="btn-acc" onclick="accPed('${p.id}','${p.origem}','${p.destino}','${earn}')">✓ Aceitar serviço</button></div></div>`;
+lista.appendChild(card);
+});
+}catch(e){console.log('Demo mode — backend offline');}
+}
+function oScr(id,btn){
+['o-home','o-curso','o-chat','o-earn','o-prof'].forEach(s=>{
+const el=document.getElementById(s);if(!el)return;
+if(s==='o-home'){el.style.display='none';}
+else if(s==='o-curso'||s==='o-chat'){el.classList.remove('on');el.style.display='none';}
+else{el.classList.remove('on');}
+});
+const el=document.getElementById(id);
+if(id==='o-home'){el.style.display='flex';}
+else if(id==='o-curso'||id==='o-chat'){el.style.display='flex';el.classList.add('on');}
+else{el.classList.add('on');}
+if(btn){document.querySelectorAll('#ui-o .nbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
+if(id==='o-curso'&&!gMapO&&typeof google!=='undefined'){initOperadorMap();}
+}
+function toggleOp(on){const s=document.getElementById('o-st');s.textContent=on?'● Disponível para serviços':'○ Indisponível';s.className='op-status '+(on?'on':'off');}
+async function accPed(pedidoId, origemAddr, destinoAddr, preco){
+pedidoId=pedidoId||'demo';
+origemAddr=origemAddr||'Rua Augusta, Lisboa, Portugal';
+destinoAddr=destinoAddr||'Avenida dos Aliados, Porto, Portugal';
+preco=preco||'34,80';
+if(pedidoId!=='demo'){
+try{
+await fetch(BACKEND+'/pedido/aceitar',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({pedido_id:pedidoId,operador_id:U.id})
+});
+}catch(e){console.log('Backend offline');}
+}
+document.getElementById('o-ord-lst').style.display='none';
+document.getElementById('o-empty').style.display='block';
+oScr('o-curso',null);
+document.querySelectorAll('#ui-o .nbtn')[1].classList.add('on');
+document.querySelectorAll('#ui-o .nbtn')[0].classList.remove('on');
+if(gMapO) showOperadorRoute(origemAddr, destinoAddr);
+document.getElementById('o-nav-btn').style.display='flex';
+document.getElementById('o-ri-earn').textContent='€'+preco;
+startTrackingOperador(pedidoId);
+}
+function startTrackingOperador(pedidoId){
+if(!navigator.geolocation) return;
+watchId=navigator.geolocation.watchPosition(async pos=>{
+const {longitude:lng,latitude:lat}=pos.coords;
+if(gMapO&&operatorMarker) operatorMarker.setLngLat([lng,lat]);
+if(pedidoId!=='demo'){
+try{
+await fetch(BACKEND+'/tracking/update',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({pedido_id:pedidoId,operador_id:U.id,lat,lng})
+});
+}catch(e){}
+}
+},{enableHighAccuracy:true,maximumAge:5000,timeout:10000});
+}
+function recPed(){document.getElementById('o-ord-lst').style.display='none';document.getElementById('o-empty').style.display='block';}
+async function doneServico(){
+stopTracking();
+if(U.pedido_ativo&&U.pedido_ativo!=='demo'){
+try{
+await fetch(BACKEND+'/pedido/entregue',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({pedido_id:U.pedido_ativo,operador_id:U.id})
+});
+}catch(e){}
+}
+oScr('o-earn',null);
+loadEarnings();
+alert('✅ Entrega confirmada! O pagamento será processado em breve.');
+}
+async function loadEarnings(){
+try{
+const r=await fetch(BACKEND+'/pedidos/operador/'+U.id);
+const pedidos=await r.json();
+const entregues=pedidos.filter(p=>p.estado==='entregue');
+const total=entregues.reduce((s,p)=>s+(parseFloat(p.preco_total)*0.80),0);
+document.getElementById('o-earn-amt') && (document.getElementById('o-earn-amt').textContent='€ '+total.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,'.'));
+document.getElementById('o-earn-count') && (document.getElementById('o-earn-count').textContent=entregues.length);
+}catch(e){}
+}
+function sendMsgO(){const i=document.getElementById('o-chat-inp');const m=i.value.trim();if(!m)return;const ms=document.getElementById('o-msgs');const t=new Date().toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'});ms.innerHTML+=`<div class="msg mo">${m}<div class="mtime">${t}</div></div>`;i.value='';ms.scrollTop=ms.scrollHeight;}
+function toggleNotif(){document.getElementById('npanel').classList.toggle('open');}
+function doLogout(){localStorage.removeItem('cl_u');location.reload();}
+let gMapC=null, gMapO=null, directionsService=null, directionsRenderer=null;
+let directionsRendererO=null, autocompleteService=null, geocoder=null;
+let trackingInterval=null, operatorMarker=null, clientMarker=null;
+let currentOriginCoords=null, currentDestCoords=null;
+function loadMapsIfNeeded(){
+if(!window._mapsLoading&&typeof mapboxgl==='undefined'){
+window._mapsLoading=true;
+loadGoogleMaps();
+}
+}
+function loadGoogleMaps(){
+if(typeof mapboxgl!=='undefined'){
+mapboxgl.accessToken=MAPBOX_TOKEN;
+initMaps();
+return;
+}
+if(!document.getElementById('mapbox-css')){
+const css=document.createElement('link');
+css.id='mapbox-css';
+css.rel='stylesheet';
+css.href='https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.css';
+document.head.appendChild(css);
+}
+const script=document.createElement('script');
+script.src='https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.js';
+script.onload=()=>{
+mapboxgl.accessToken=MAPBOX_TOKEN;
+initMaps();
+};
+document.head.appendChild(script);
+}
+function initMaps(){
+const cmapEl=document.getElementById('gmap-c');
+if(cmapEl){
+gMapC=new mapboxgl.Map({
+container:'gmap-c',
+style:'mapbox://styles/mapbox/light-v11',
+center:[-9.1395,38.7169],
+zoom:12,
+attributionControl:false
+});
+gMapC.addControl(new mapboxgl.NavigationControl({showCompass:false}),'right');
+cmapEl.style.display='block';
+const fb=document.getElementById('cmap-fallback');
+if(fb) fb.style.display='none';
+gMapC.on('load',()=>{
+if(navigator.geolocation){
+navigator.geolocation.getCurrentPosition(pos=>{
+const{longitude:lng,latitude:lat}=pos.coords;
+gMapC.flyTo({center:[lng,lat],zoom:13});
+new mapboxgl.Marker({color:'#22C55E'}).setLngLat([lng,lat]).addTo(gMapC);
+document.getElementById('c-mpill').innerHTML='<span style="width:6px;height:6px;background:var(--p);border-radius:50%;display:inline-block;"></span>3 operadores disponíveis';
+},()=>{
+document.getElementById('c-mpill').innerHTML='<span style="width:6px;height:6px;background:var(--p);border-radius:50%;display:inline-block;"></span>3 operadores disponíveis';
+});
+} else {
+document.getElementById('c-mpill').innerHTML='<span style="width:6px;height:6px;background:var(--p);border-radius:50%;display:inline-block;"></span>3 operadores disponíveis';
+}
+});
+}
+if(U&&U.tipo==='operador') initOperadorMap();
+}
+function initOperadorMap(){
+let acTimer=null;
+function acSearch(input,dropId){
+const val=input.value.trim();
+const drop=document.getElementById(dropId);
+if(!val||val.length<3){drop.classList.remove('show');return;}
+clearTimeout(acTimer);
+acTimer=setTimeout(async()=>{
+try{
+const url=`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(val)}.json?access_token=${MAPBOX_TOKEN}&autocomplete=true&language=pt&country=pt,es,fr,de,gb,nl,be&types=address,place,poi&limit=5`;
+const r=await fetch(url);
+const d=await r.json();
+drop.innerHTML='';
+if(!d.features||!d.features.length){drop.classList.remove('show');return;}
+d.features.forEach(f=>{
+const item=document.createElement('div');
+item.className='ac-item';
+const main=f.text||f.place_name.split(',')[0];
+const sub=f.place_name.replace(main+', ','');
+item.innerHTML=`<span class="ac-icon">📍</span><div><div class="ac-main">${main}</div><div class="ac-sub">${sub}</div></div>`;
+item.onclick=()=>{
+input.value=f.place_name;
+input.dataset.coords=JSON.stringify(f.center);
+drop.classList.remove('show');
+const o=document.getElementById('c-orig');
+const d2=document.getElementById('c-dest');
+if(o.value&&d2.value&&o.dataset.coords&&d2.dataset.coords) calcRoute();
+};
+drop.appendChild(item);
+});
+drop.classList.add('show');
+}catch(e){console.error('Autocomplete error:',e);}
+},300);
+}
+document.addEventListener('click',e=>{
+if(!e.target.closest('.autocomplete-wrap')){
+document.querySelectorAll('.autocomplete-dropdown').forEach(d=>d.classList.remove('show'));
+}
+});
+async function calcRoute(){
+const origEl=document.getElementById('c-orig');
+const destEl=document.getElementById('c-dest');
+if(!origEl.dataset.coords||!destEl.dataset.coords) return;
+const[oLng,oLat]=JSON.parse(origEl.dataset.coords);
+const[dLng,dLat]=JSON.parse(destEl.dataset.coords);
+currentOriginCoords=[oLng,oLat];
+currentDestCoords=[dLng,dLat];
+try{
+const url=`https://api.mapbox.com/directions/v5/mapbox/driving/${oLng},${oLat};${dLng},${dLat}?access_token=${MAPBOX_TOKEN}&geometries=geojson&overview=full&language=pt`;
+const r=await fetch(url);
+const d=await r.json();
+if(!d.routes||!d.routes.length){alert('Não foi possível calcular a rota. Verifica as moradas.');return;}
+const route=d.routes[0];
+const distKm=(route.distance/1000).toFixed(1);
+const durMin=Math.ceil(route.duration/60);
+const durText=durMin>=60?`${Math.floor(durMin/60)}h ${durMin%60}min`:`${durMin} min`;
+document.getElementById('c-dist').value=distKm;
+if(gMapC){
+if(gMapC.getSource('route')){gMapC.removeLayer('route');gMapC.removeSource('route');}
+new mapboxgl.Marker({color:'#111'}).setLngLat([oLng,oLat]).addTo(gMapC);
+new mapboxgl.Marker({color:'#22C55E'}).setLngLat([dLng,dLat]).addTo(gMapC);
+gMapC.addSource('route',{type:'geojson',data:{type:'Feature',geometry:route.geometry}});
+gMapC.addLayer({id:'route',type:'line',source:'route',layout:{'line-join':'round','line-cap':'round'},paint:{'line-color':'#22C55E','line-width':5,'line-opacity':.85}});
+const bounds=new mapboxgl.LngLatBounds([oLng,oLat],[dLng,dLat]);
+gMapC.fitBounds(bounds,{padding:{top:60,bottom:200,left:30,right:30}});
+}
+document.getElementById('c-dist-bar').style.display='block';
+document.getElementById('c-dist-text').textContent=distKm+' km · '+durText;
+document.getElementById('c-dist-km').textContent=distKm+' km';
+document.getElementById('c-ri-dist').textContent=distKm+' km';
+document.getElementById('c-ri-time').textContent=durText;
+document.getElementById('c-route-bar').classList.remove('hidden');
+document.getElementById('c-mpill').innerHTML='<span style="width:6px;height:6px;background:var(--p);border-radius:50%;display:inline-block;"></span>'+distKm+' km · '+durText;
+showPR();
+calcPr();
+}catch(e){console.error('Route error:',e);}
+}
+function initOperadorMap(){
+const omapEl=document.getElementById('gmap-o');
+if(!omapEl||gMapO) return;
+gMapO=new mapboxgl.Map({
+container:'gmap-o',
+style:'mapbox://styles/mapbox/light-v11',
+center:[-9.1395,38.7169],
+zoom:13,
+attributionControl:false
+});
+gMapO.addControl(new mapboxgl.NavigationControl({showCompass:false}),'right');
+omapEl.style.display='block';
+const fb=document.getElementById('omap-fallback');
+if(fb) fb.style.display='none';
+if(navigator.geolocation){
+navigator.geolocation.getCurrentPosition(pos=>{
+const{longitude:lng,latitude:lat}=pos.coords;
+gMapO.flyTo({center:[lng,lat],zoom:14});
+const el=document.createElement('div');
+el.innerHTML='🚛';
+el.style.cssText='font-size:1.6rem;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3));';
+operatorMarker=new mapboxgl.Marker({element:el}).setLngLat([lng,lat]).addTo(gMapO);
+document.getElementById('o-mpill').textContent='📍 A tua localização';
+});
+}
+}
+async function showOperadorRoute(origAddr,destAddr){
+if(!gMapO) return;
+const geocode=async(addr)=>{
+const r=await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(addr)}.json?access_token=${MAPBOX_TOKEN}&limit=1`);
+const d=await r.json();
+return d.features[0]?.center;
+};
+const[oCoords,dCoords]=await Promise.all([geocode(origAddr),geocode(destAddr)]);
+if(!oCoords||!dCoords) return;
+const url=`https://api.mapbox.com/directions/v5/mapbox/driving/${oCoords[0]},${oCoords[1]};${dCoords[0]},${dCoords[1]}?access_token=${MAPBOX_TOKEN}&geometries=geojson&overview=full`;
+const r=await fetch(url);
+const d=await r.json();
+if(!d.routes?.length) return;
+const route=d.routes[0];
+const distKm=(route.distance/1000).toFixed(1);
+const durMin=Math.ceil(route.duration/60);
+const durText=durMin>=60?`${Math.floor(durMin/60)}h ${durMin%60}min`:`${durMin} min`;
+gMapO.on('load',()=>{
+if(gMapO.getSource('route-o')){gMapO.removeLayer('route-o');gMapO.removeSource('route-o');}
+new mapboxgl.Marker({color:'#111'}).setLngLat(oCoords).addTo(gMapO);
+new mapboxgl.Marker({color:'#22C55E'}).setLngLat(dCoords).addTo(gMapO);
+gMapO.addSource('route-o',{type:'geojson',data:{type:'Feature',geometry:route.geometry}});
+gMapO.addLayer({id:'route-o',type:'line',source:'route-o',layout:{'line-join':'round','line-cap':'round'},paint:{'line-color':'#22C55E','line-width':5,'line-opacity':.85}});
+const bounds=new mapboxgl.LngLatBounds(oCoords,dCoords);
+gMapO.fitBounds(bounds,{padding:60});
+});
+currentDestCoords=dCoords;
+document.getElementById('o-ri-dist').textContent=distKm+' km';
+document.getElementById('o-ri-time').textContent=durText;
+document.getElementById('o-route-bar').classList.remove('hidden');
+document.getElementById('o-nav-btn').style.display='flex';
+document.getElementById('o-mpill').textContent='🚛 Em rota · '+distKm+' km';
+}
+let watchId=null;
+function startTracking(){
+if(!navigator.geolocation||!gMapC) return;
+watchId=navigator.geolocation.watchPosition(pos=>{
+const loc={lat:pos.coords.latitude,lng:pos.coords.longitude};
+if(!operatorMarker){
+title:'Operador'
+});
+} else {
+operatorMarker.setPosition(loc);
+}
+gMapC.panTo(loc);
+},{enableHighAccuracy:true,maximumAge:5000,timeout:10000});
+}
+function stopTracking(){
+if(watchId) navigator.geolocation.clearWatch(watchId);
+watchId=null;
+}
+const _origBoot=boot;
+function animV(){
+const pos=[[['46%','29%'],['56%','23%'],['60%','37%'],['50%','41%']],[['66%','55%'],['72%','47%'],['64%','60%'],['68%','52%']],[['20%','64%'],['15%','57%'],['22%','71%'],['18%','61%']]];
+let i=0;setInterval(()=>{i=(i+1)%4;['cv1','cv2','cv3'].forEach((id,j)=>{const el=document.getElementById(id);if(el){el.style.left=pos[j][i][0];el.style.top=pos[j][i][1];}});},2800);
+}
+const _p=new URLSearchParams(window.location.search);
+if(_p.get('tipo')==='operador'){swTab('reg');const s=document.getElementById('r-tp');if(s)s.value='operador';}
+if(_p.get('reset')==='true') openFgt();
+</script>
+<!-- PAYMENT MODAL -->
+<div id="pay-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:flex-end;justify-content:center;">
+  <div style="background:#fff;border-radius:24px 24px 0 0;padding:1.8rem 1.4rem;width:100%;max-width:480px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;">
+      <div style="font-size:1.1rem;font-weight:800;color:var(--tx);letter-spacing:-.02em;">💳 Pagamento seguro</div>
+      <button onclick="closePayModal()" style="border:none;background:none;cursor:pointer;font-size:1.2rem;color:var(--tx2);">✕</button>
+    </div>
+    <!-- TOTAL -->
+    <div style="background:var(--bg3);border:1.5px solid var(--pm);border-radius:14px;padding:.9rem 1rem;margin-bottom:1.2rem;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--pd)">Total a pagar</div>
+        <div style="font-size:.72rem;color:var(--tx2);margin-top:.1rem;">Debitado após entrega confirmada</div>
+      </div>
+      <div style="font-size:1.7rem;font-weight:800;color:var(--pd);letter-spacing:-.04em;" id="pay-total">€ --</div>
+    </div>
+    <!-- CARD ELEMENT -->
+    <div style="margin-bottom:1rem;">
+      <label style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2);display:block;margin-bottom:.5rem;">Cartão de débito/crédito</label>
+      <div id="card-element" style="background:var(--bg2);border:1.5px solid var(--bd);border-radius:12px;padding:.9rem 1rem;"></div>
+      <div id="card-error" style="color:var(--rd);font-size:.78rem;margin-top:.4rem;display:none;"></div>
+    </div>
+    <!-- SECURITY NOTE -->
+    <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;font-size:.72rem;color:var(--tx2);">
+      <span>🔒</span>
+      <span>Pagamento processado via <strong>Stripe</strong> · Certificado PCI-DSS · SSL</span>
+    </div>
+    <!-- PAY BUTTON -->
+    <button id="pay-btn" onclick="processarPagamento()" style="width:100%;padding:.95rem;border:none;border-radius:12px;background:var(--p);color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;">
+      ✅ Pagar agora
+    </button>
+  </div>
+</div>
+<script src='https://js.stripe.com/v3/' async></script>
+</body></html>
