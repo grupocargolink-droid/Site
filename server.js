@@ -8,7 +8,12 @@ require('dotenv').config();
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const app = express();
-app.use(cors({ origin: '*' }));
+app.use(cors({ 
+  origin: '*',
+  methods: ['GET','POST','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization']
+}));
+app.options('*', cors());
 app.use(express.json());
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SECRET_KEY);
@@ -18,14 +23,22 @@ app.get('/', (req, res) => res.json({ status: 'CargoLink Backend a funcionar!', 
 
 // ── AUTH ──
 app.post('/auth/registar', async (req, res) => {
-  const { nome, email, password, tipo, telefone } = req.body;
+  const { nome, email, password, tipo, telefone, nif, veiculo_tipo, veiculo_matricula, iban, iban_titular } = req.body;
   if (!nome || !email || !password || !tipo) return res.status(400).json({ erro: 'Dados incompletos' });
   const { data, error } = await supabase.auth.admin.createUser({
     email, password, email_confirm: true,
     user_metadata: { nome, tipo, telefone }
   });
   if (error) return res.status(400).json({ erro: error.message });
-  await supabase.from('utilizadores').insert([{ id: data.user.id, nome, email, tipo, telefone }]);
+  const userData = { id: data.user.id, nome, email, tipo, telefone };
+  if (tipo === 'operador') {
+    if (nif) userData.nif = nif;
+    if (veiculo_tipo) userData.veiculo_tipo = veiculo_tipo;
+    if (veiculo_matricula) userData.veiculo_matricula = veiculo_matricula;
+    if (iban) userData.iban = iban;
+    if (iban_titular) userData.iban_titular = iban_titular;
+  }
+  await supabase.from('utilizadores').insert([userData]);
   res.json({ sucesso: true, utilizador: { id: data.user.id, nome, email, tipo } });
 });
 
@@ -315,6 +328,17 @@ app.post('/operador/online', async (req, res) => {
 });
 
 // ── PAGAMENTOS ──
+app.post('/operador/veiculo', async (req, res) => {
+  const { operador_id, tipo, matricula, modelo, ano } = req.body;
+  if (!operador_id) return res.status(400).json({ erro: 'Dados incompletos' });
+  const { error } = await supabase
+    .from('utilizadores')
+    .update({ veiculo_tipo: tipo, veiculo_matricula: matricula })
+    .eq('id', operador_id);
+  if (error) return res.status(400).json({ erro: error.message });
+  res.json({ sucesso: true });
+});
+
 app.post('/operador/guardar-iban', async (req, res) => {
   const { operador_id, iban, titular } = req.body;
   if (!operador_id || !iban) return res.status(400).json({ erro: 'Dados incompletos' });
@@ -363,6 +387,48 @@ app.post('/pagamento/criar', async (req, res) => {
       operadorRecebe: (valorCentimos - comissaoCentimos) / 100
     });
   } catch (err) { res.status(400).json({ erro: err.message }); }
+});
+
+// ── MAPBOX PROXY (evita CORS no browser) ──
+const https = require('https');
+
+function httpsGet(url) {
+  return new Promise((resolve, reject) => {
+    https.get(url, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try { resolve(JSON.parse(data)); }
+        catch (e) { reject(e); }
+      });
+    }).on('error', reject);
+  });
+}
+
+const MAPBOX_TOKEN = 'pk.eyJ1IjoiZ3J1cG9jYXJnb2xpbmsiLCJhIjoiY21tcm8xOWcyMHYzMTJwcjJzZzR3bnl4dyJ9.qTPo14zk0sMUXlw7lj67Vg';
+
+app.get('/geo/autocomplete', async (req, res) => {
+  const { q } = req.query;
+  if (!q) return res.status(400).json({ erro: 'Query obrigatória' });
+  try {
+    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${MAPBOX_TOKEN}&autocomplete=true&language=pt&country=pt,es,fr,de,gb,nl,be&types=address,place,poi&limit=5`;
+    const d = await httpsGet(url);
+    res.json(d);
+  } catch (err) {
+    res.status(500).json({ erro: err.message });
+  }
+});
+
+app.get('/geo/route', async (req, res) => {
+  const { oLng, oLat, dLng, dLat } = req.query;
+  if (!oLng || !oLat || !dLng || !dLat) return res.status(400).json({ erro: 'Coordenadas obrigatórias' });
+  try {
+    const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${oLng},${oLat};${dLng},${dLat}?access_token=${MAPBOX_TOKEN}&geometries=geojson&overview=full&language=pt`;
+    const d = await httpsGet(url);
+    res.json(d);
+  } catch (err) {
+    res.status(500).json({ erro: err.message });
+  }
 });
 
 const PORT = process.env.PORT || 3000;
